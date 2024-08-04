@@ -35,12 +35,12 @@
                                 <div class="input-group" style="margin-top: 4px;">
 
                                     <span class="input-group-text" id="inputId">ID</span>
-                                    <input type="text" class="form-control" placeholder="ID do item" aria-label="ID do item" aria-describedby="inputId">
+                                    <input type="text" class="form-control" placeholder="ID do item" aria-label="ID do item" aria-describedby="inputId" id="inputIdValor">
 
                                     <span class="input-group-text" id="inputValor">R$</span>
-                                    <input type="text" class="form-control" placeholder="Valor" aria-label="Valor" aria-describedby="inputValor">
+                                    <input type="text" class="form-control" placeholder="Valor" aria-label="Valor" aria-describedby="inputValor" id="inputValorValor">
                                 
-                                    <button type="button" class="btn btn-primary">Realizar Operação</button>
+                                    <button type="button" class="btn btn-primary" onclick="realizar_operacao()">Realizar Operação</button>
                                 </div>
                             </div>
                         </div>
@@ -48,8 +48,8 @@
                 </div>
                 <div class="log-execucao"> <!-- Log de execução -->
                     <div class="card" style="width: 100%;">
-                        <div class="card-body">
-                            Cartão do log
+                        <div class="card-body" id="log-trace">
+                            Log
                         </div>
                     </div>
                 </div>
@@ -59,21 +59,24 @@
                     <div class="caixa-cache">
                         <div class="card" style="width: 100%;">
                             <div class="card-body">
-                                Cartão do log
+                                Nova Iorque
+                                <div id="ny-cache">
+
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="caixa-cache">
                         <div class="card" style="width: 100%;">
                             <div class="card-body">
-                                Cartão do log
+                                Berlim
                             </div>
                         </div>
                     </div>
                     <div class="caixa-cache">
                         <div class="card" style="width: 100%;">
                             <div class="card-body">
-                                Cartão do log
+                                Tóquio
                             </div>
                         </div>
                     </div>
@@ -81,7 +84,7 @@
                 <div class="parte-ram"> <!-- Parte de baixo - RAM -->
                     <div class="card" style="width: 100%;">
                         <div class="card-body">
-                            Cartão do log
+                            Repositório global
                         </div>
                     </div>
                 </div>
