@@ -22,7 +22,7 @@ function realizar_operacao()
         return;
     }
     
-    if (valor == undefined || valor == "")
+    if ((valor == "" && operacao == 1)|| valor == undefined)
     {
         alert("Insira um valor");
         return;
