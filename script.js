@@ -4,7 +4,7 @@ var cache_nova_iorque = [1,2,3,4,5,6,7,8,9,1,5,8,8];
 var cache_berlim = [1];
 var cache_toquio = [1,23,4,12];
 
-var ram = [];
+var ram = [1,2,3,4];
 
 function realizar_operacao()
 {
@@ -31,16 +31,19 @@ function realizar_operacao()
     // Verificar se o ID é um valor numérico válido
 
     // Verificar se o valor é um número válido
+
+    // Realizar MESI
         
     gui_atualizar_cache(1);
     gui_atualizar_cache(2);
     gui_atualizar_cache(3);
-    // gui_atualizar_ram();
+    gui_atualizar_ram();
 
     log_trace += "<br> Local de operação: " + local;
     log_trace += "<br> Operação: " + operacao;
     log_trace += "<br> ID: " + id;
     log_trace += "<br> Valor: " + valor;
+    log_trace += "<br> " + geradorItemAleatorio();
     // Ir realizando as operações com base nos parâmetros...
     // Cada operação vai dando append ao log_trace com as decisões que foram tomadas e por quais motivos
     // No final, esse log_trace vai ser colocado no cartão de log
@@ -87,4 +90,289 @@ function gui_atualizar_cache(cache)
         novo_filho.innerHTML = texto; 
         elemento_pai.appendChild(novo_filho);      
     }
+}
+
+function gui_atualizar_ram()
+{
+    /*
+        Atualiza a RAM na tela do navegador com os dados armazenados nela
+    */
+    let elemento_pai = document.getElementById("lista-ram");
+
+    elemento_pai.innerHTML = "";
+
+    for (let i = 0; i < ram.length; i++)
+    {
+        let novo_filho = document.createElement("tr");
+        let texto = "";
+        texto += "<td>" + i + "</td>"; // Id 
+        texto += "<td>" + i + "</td>"; // Valor
+        texto += "<td>" + i + "</td>"; // Nome
+        novo_filho.innerHTML = texto;
+        elemento_pai.appendChild(novo_filho);
+    }
+}
+
+function geradorItemAleatorio()
+{
+    let items = [
+        "caixa de marcadores",
+        "brócolis",
+        "brilho labial",
+        "saco de pipoca",
+        "pena",
+        "grudar",
+        "veleiro",
+        "ponteiro laser",
+        "remoto",
+        "fita adesiva",
+        "televisão",
+        "canudo",
+        "bola de futebol",
+        "telefone",
+        "par de brincos",
+        "garrafa de especiarias",
+        "leão",
+        "poucas baterias",
+        "caixa de chocolates",
+        "meias",
+        "par de óculos de água",
+        "lata de refrigerante",
+        "dinossauro de pelúcia",
+        "árvore",
+        "beisebol",
+        "taco de piscina",
+        "pônei de pelúcia",
+        "renda",
+        "tesoura",
+        "vela",
+        "par de pinças",
+        "faca",
+        "livro de partidas",
+        "janela",
+        "cubo de gelo",
+        "chave",
+        "caixa de sorvete",
+        "bandeira",
+        "faca de manteiga",
+        "chocolate",
+        "laranja",
+        "espelho de mão",
+        "tubo de papel higiênico",
+        "cenoura",
+        "secador de cabelo",
+        "casa",
+        "saco de elásticos",
+        "martelo",
+        "estatueta",
+        "CD de música",
+        "pulseira",
+        "frasco de protetor solar",
+        "colher de pau",
+        "Desodorante",
+        "sapo de pelúcia",
+        "sino",
+        "controle sem fio",
+        "vaca",
+        "taco de beisebol",
+        "pote de picles",
+        "cristal de quartzo",
+        "rádio",
+        "par de óculos de sol",
+        "cartucho de jogo",
+        "pão",
+        "pulseira",
+        "chão",
+        "caneca de café",
+        "garrafa vazia",
+        "limão",
+        "balão",
+        "bolsa pequena",
+        "porta",
+        "blusa",
+        "carro",
+        "chave de fenda",
+        "pote de biscoitos",
+        "recipiente de pudim",
+        "garrafa de óleo",
+        "anel",
+        "carretel de linha",
+        "unha",
+        "escova de dentes",
+        "carteira",
+        "rinoceronte",
+        "capacete",
+        "baleia",
+        "frasco de comprimidos",
+        "anel de dedo do pé",
+        "tampa de garrafa",
+        "comida",
+        "aliança de casamento",
+        "avião de brinquedo",
+        "giz",
+        "monitor",
+        "par de binóculos",
+        "câmera",
+        "garrafa de água",
+        "teclado",
+        "lista de compras",
+        "tubo de protetor labial",
+        "espelho",
+        "tomate",
+        "bloco de desenho",
+        "espada",
+        "loção",
+        "porta-incenso",
+        "fivela",
+        "mármore",
+        "frango",
+        "pau de chenille",
+        "assobiar",
+        "frasco de esmalte",
+        "ocarina",
+        "luzes de rua",
+        "assistir",
+        "tornado",
+        "nota adesiva",
+        "chaveiro",
+        "botão de camisa",
+        "rolo de adesivos",
+        "porta-retratos",
+        "copo de vinho",
+        "pacote de cartas",
+        "bandana",
+        "afiado",
+        "carimbo de borracha",
+        "soldado de brinquedo",
+        "livro de adesivos",
+        "cenouras",
+        "bolsa",
+        "corda",
+        "banheiro",
+        "lata de biscoitos",
+        "livro infantil",
+        "rolo de gaze",
+        "iPod",
+        "par de algemas",
+        "caixa de giz de cera",
+        "faca de bife",
+        "panda",
+        "polvo de pelúcia",
+        "garrafa de mel",
+        "caneta",
+        "computador",
+        "hamster",
+        "CD do jogo",
+        "carne bovina",
+        "frigideira",
+        "anzol de pesca",
+        "saco de bolas de algodão",
+        "copo de martíni",
+        "busca de palavras",
+        "pedaço de goma",
+        "panela de barro",
+        "jogos de vídeo",
+        "história em quadrinhos",
+        "revista",
+        "geladeira",
+        "chaveiro",
+        "futebol",
+        "travesseiro",
+        "cafeteira",
+        "aquecedores de pernas",
+        "máquina de lavar",
+        "livro de capítulo",
+        "ursinhos",
+        "livro de cheques",
+        "cabo de extensão",
+        "lixador de unhas",
+        "quebra-cabeça",
+        "barra de sabonete",
+        "microfone",
+        "rolo de papel higiênico",
+        "pedra de cimento",
+        "placa",
+        "laço de cabelo",
+        "pano",
+        "cadarço de sapato",
+        "pasta de dente",
+        "poça",
+        "garrafa de xarope",
+        "saleiro",
+        "lâmpada elétrica",
+        "cesta de mão",
+        "par de óculos",
+        "parafuso",
+        "concha de vieira",
+        "pato de borracha",
+        "bolsa",
+        "sandália",
+        "lupa",
+        "urso de pelúcia",
+        "cinto",
+        "telefone celular",
+        "espátula",
+        "lata de pimenta",
+        "bolsa/bolsa",
+        "bule de chá",
+        "pacote de comestíveis crocantes e crocantes",
+        "folha de papel",
+        "lata de ervilhas",
+        "palito",
+        "caixa de giz",
+        "garrafa de tinta",
+        "relógio",
+        "temporizador de ovo",
+        "cortiça",
+        "rolo de fita adesiva",
+        "garrafa de tinta",
+        "pomba",
+        "papel",
+        "saco de lixo",
+        "branco",
+        "agulha",
+        "coelho",
+        "tigre",
+        "furadeira",
+        "pá de jardim",
+        "concha de caracol",
+        "pote de geléia",
+        "palito de sorvete",
+        "elástico",
+        "roupas",
+        "bastão de doces",
+        "pacote de sementes",
+        "boné de beisebol",
+        "bastão luminoso",
+        "modelo de carro",
+        "par de agulhas de tricô",
+        "prendedor de roupa",
+        "esquilo",
+        "tapete",
+        "catálogo",
+        "bloco de notas",
+        "lenço",
+        "rolo",
+        "mata-moscas",
+        "relógio de pulso",
+        "óculos de sol",
+        "tigela",
+        "ovo",
+        "balde",
+        "cortador de unhas",
+        "cartão",
+        "novelo de lã",
+        "colar de pérolas",
+        "bolota",
+        "álbum de fotos",
+        "girafa",
+        "meias",
+        "coelho de pelúcia",
+        "fúrcula",
+        "tartaruga",
+        "chapéu de cowboy",
+        "espanador"
+    ];
+
+    return items[Math.floor(Math.random() * items.length)];
 }
