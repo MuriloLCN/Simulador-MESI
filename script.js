@@ -1,10 +1,55 @@
+/*
+
+*/
+
+const tamanho_bloco_memoria = 16;
+const tamanho_max_cache = 16;
+const tamanho_max_ram = 256;
+
 var log_trace = "";
+
+// Cache:
+//    Bloco | Offset | Estado | Valor
+//    Bloco = 0 até (tamanho_max_ram / tamanho_bloco_memoria) - 1
+//    Offset = Endereço - Bloco * tamanho_bloco_memoria
+//    Estado = MESI
+//    Valor = Dinheiro envolvido no lance
+
+// RAM:
+//    Endereço | Valor | Nome
+//    Endereço = 0 até tamanho_max_ram - 1
+//    Valor = Dinheiro envolvido no lance
+//    Nome = Nome aleatório gerado
 
 var cache_nova_iorque = [1,2,3,4,5,6,7,8,9,1,5,8,8];
 var cache_berlim = [1];
 var cache_toquio = [1,23,4,12];
 
-var ram = [1,2,3,4];
+var ram = [];
+
+function dar_lance(local, endereco, valor)
+{
+
+}
+
+function buscar_preco(local, endereco)
+{
+
+}
+
+function entrada_mesi(operacao, valor, endereco, local)
+{
+    if (operacao == 1)
+    {
+        log_trace += "<br> Iniciando operação: Dar lance (escrita) no item de endereço " + endereco + " com o valor de " + valor + " reais por meio do local " + local;
+        dar_lance(local, endereco, valor);
+    }
+    else if (operacao == 2)
+    {
+        log_trace += "<br> Iniciando operação: Buscar preço (leitura) no item de endereço " + endereco + " por meio do local " + local;
+        buscar_preco(local, endereco);
+    }
+}
 
 function realizar_operacao()
 {
@@ -33,6 +78,7 @@ function realizar_operacao()
     // Verificar se o valor é um número válido
 
     // Realizar MESI
+    entrada_mesi(operacao, valor, id, local);
         
     gui_atualizar_cache(1);
     gui_atualizar_cache(2);
@@ -84,9 +130,11 @@ function gui_atualizar_cache(cache)
     {
         let novo_filho = document.createElement("tr");
         let texto = "";
-        texto += "<td>"+ i +"</td>";  // aqui vem o ID
+
+        texto += "<td>"+ i +"</td>";  // aqui vem o Bloco
+        texto += "<td>"+ i +"</td>";  // aqui vem o Offset
+        texto += "<td>"+ i +"</td>";  // aqui vem o Estado
         texto += "<td>"+ i +"</td>";  // aqui vem o valor
-        texto += "<td>"+ i +"</td>";  // aqui vem o status
         novo_filho.innerHTML = texto; 
         elemento_pai.appendChild(novo_filho);      
     }
@@ -105,12 +153,27 @@ function gui_atualizar_ram()
     {
         let novo_filho = document.createElement("tr");
         let texto = "";
-        texto += "<td>" + i + "</td>"; // Id 
-        texto += "<td>" + i + "</td>"; // Valor
-        texto += "<td>" + i + "</td>"; // Nome
+        texto += "<td>" + ram[i].endereco + "</td>"; // Id 
+        texto += "<td>" + ram[i].valor + "</td>"; // Valor
+        texto += "<td>" + ram[i].nome + "</td>"; // Nome
         novo_filho.innerHTML = texto;
         elemento_pai.appendChild(novo_filho);
     }
+}
+
+function preencher_ram()
+{
+    for (let i = 0; i < tamanho_max_ram; i++)
+    {
+        let obj = {endereco: i, valor: 1, nome: geradorItemAleatorio()};
+        ram.push(obj);
+    }
+}
+
+function inicializar_pagina()
+{
+    preencher_ram();
+    gui_atualizar_ram();
 }
 
 function geradorItemAleatorio()
