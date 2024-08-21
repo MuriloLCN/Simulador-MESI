@@ -29,12 +29,62 @@ var ram = [];
 
 function dar_lance(local, endereco, valor)
 {
+    // Se CACHE HIT
+    
+    // Ver estado da cópia local
 
+    // Se MODIFICADO, apenas alterar o valor
+
+    // Se EXCLUSIVO, alterar o valor e mudar o estado para MODIFIED
+
+    // Se COMPARTILHADO:
+    //    Mude o estado da linha nas outras caches para INVALIDO
+    //    Atualize a linha local
+    //    Mude o estado para MODIFICADO
+
+    // Se CACHE MISS
+
+    // Read with intention to modify
+
+    // Alguma outra cache tem a cópia?
+    // Se não, busque o valor da memória principal e coloque o estado MODIFICADO
+
+    // Se sim:
+    // Qual é o estado delas?
+
+    // Se MODIFICADO:
+    //    A cache que possui a cópia manda ela para a RAM e coloca ela como INVÁLIDA
+    //    A cache local busca o valor da memória e coloca o estado como MODIFICADO
+
+    // Se EXCLUSIVO ou COMPARTILHADO:
+    //    Outros cores colocam estado como INVÁLIDO
+    //    Core local busca valor da RAM e coloca como MODIFICADO
 }
 
 function buscar_preco(local, endereco)
 {
+    // Se CACHE HIT, apenas retornar o valor
 
+    // Se CACHE MISS:
+
+    // Verificar o número de cores com a cópia
+
+    // Se nenhum tem cópia:
+    //    Pegar dado da memória
+    //    Guardar na cache adequada (do local) com o estado EXCLUSIVO
+
+    // Se 1 cache tem a cópia:
+    //    Se a cópia está no estado EXCLUSIVO
+    //       Copie o valor para a cache local com o estado SHARED
+    //       Troque o estado da cache de origem para SHARED
+    //    Se a cópia está no estado MODIFICADO
+    //       Coloque o valor da cópia na RAM
+    //       Copie o valor para a cache local com o estado SHARED
+    //       Altere o estado da cache de origem para SHARED
+
+    // Se mais de um tem a cópia:
+    //    Recebe o valor de qualquer cache
+    //    Altere o estado da cache local para SHARED
 }
 
 function entrada_mesi(operacao, valor, endereco, local)
