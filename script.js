@@ -144,8 +144,10 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_nova_iorque.push(novo_obj);
         if (cache_nova_iorque.length > tamanho_max_cache)
         {
-            alert("teste");
-            inserir_na_ram(cache_nova_iorque[0].bloco * tamanho_bloco_memoria + cache_nova_iorque[0].offset, cache_nova_iorque[0].valor);
+            if (cache_nova_iorque[0].estado !== "INVALIDO")
+            {
+                inserir_na_ram(cache_nova_iorque[0].bloco * tamanho_bloco_memoria + cache_nova_iorque[0].offset, cache_nova_iorque[0].valor);
+            }
             cache_nova_iorque.shift();
         }
     }
@@ -155,7 +157,10 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_berlim.push(novo_obj);
         if (cache_berlim > tamanho_max_cache)
         {
-            inserir_na_ram(cache_berlim[0].bloco * tamanho_bloco_memoria + cache_berlim[0].offset, cache_berlim[0].valor);
+            if (cache_nova_iorque[0].estado !== "INVALIDO")
+            {
+                inserir_na_ram(cache_berlim[0].bloco * tamanho_bloco_memoria + cache_berlim[0].offset, cache_berlim[0].valor);
+            }
             cache_berlim.shift();
         }
     }
@@ -165,7 +170,10 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_toquio.push(novo_obj);
         if (cache_toquio.length > tamanho_max_cache)
         {
-            inserir_na_ram(cache_toquio[0].bloco * tamanho_bloco_memoria + cache_toquio[0].offset, cache_toquio[0].valor);
+            if (cache_nova_iorque[0].estado !== "INVALIDO")
+            {
+                inserir_na_ram(cache_toquio[0].bloco * tamanho_bloco_memoria + cache_toquio[0].offset, cache_toquio[0].valor);
+            }
             cache_toquio.shift();
         }
     }
