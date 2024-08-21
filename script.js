@@ -49,44 +49,78 @@ function buscar_na_cache(local, endereco)
     {
         if ((cache_usada[i].bloco * tamanho_bloco_memoria + cache_usada[i].offset) == endereco)
         {
-            return cache_usada[i];
+            return {dados_linha: cache_usada[i], indice: i};
         }
     }
 
     return null;
 }
 
-function inserir_na_cache(local, endereco, valor, estado)
+function inserir_na_cache(local, endereco, valor_ins, estado_ins)
 {
-    let bloco = Math.floor(endereco / tamanho_bloco_memoria);
-    let offset = endereco - bloco * tamanho_bloco_memoria;
+    let bloco_ins = Math.floor(endereco / tamanho_bloco_memoria);
+    let offset_ins = endereco - bloco_ins * tamanho_bloco_memoria;
 
+    
     // Se linha da cache já existir, sobreescreva
+    let resultado_busca = buscar_na_cache(local, endereco);
+    if (resultado_busca !== null)
+    {
+        if (local == 1)
+        {
+            cache_nova_iorque[resultado_busca.indice].valor = valor_ins;
+            cache_nova_iorque[resultado_busca.indice].estado = estado_ins;
+        }
+        else if (local == 2)
+        {
+            cache_berlim[resultado_busca.indice].valor = valor_ins;
+            cache_berlim[resultado_busca.indice].estado = estado_ins;
+        }
+        else
+        {
+            cache_toquio[resultado_busca.indice].valor = valor_ins;
+            cache_toquio[resultado_busca.indice].estado = estado_ins;
+        }
+        return;
+    }
+                
     // Se não, crie uma nova
-
-    if (1);
+    let novo_obj = {bloco: bloco_ins, offset: offset_ins, estado: estado_ins, valor: valor_ins};
 
     // Se, após inserir, o tamanho extrapolar o limite, apague o primeiro valor (FIFO)
 
     if (local == 1)
     {
         // cache_usada = cache_nova_iorque
-        
+        cache_nova_iorque.push(novo_obj);
+        if (cache_nova_iorque.length > tamanho_max_cache)
+        {
+            cache_nova_iorque = cache_nova_iorque.shift();
+        }
     }
     else if (local == 2)
     {
         // cache_usada = cache_berlim
-        
+        cache_berlim.push(novo_obj);
+        if (cache_berlim > tamanho_max_cache)
+        {
+            cache_berlim = cache_berlim.shift();
+        }
     }
     else
     {
         // cache_usada = cache_toquio
-        
+        cache_toquio.push(novo_obj);
+        if (cache_toquio.length > tamanho_max_cache)
+        {
+            cache_toquio = cache_toquio.shift();
+        }
     }
 }
 
 function dar_lance(local, endereco, valor)
 {
+    inserir_na_cache(local, endereco, valor, "TESTE");
     // Se CACHE HIT
     
     // Ver estado da cópia local
@@ -245,10 +279,10 @@ function gui_atualizar_cache(cache)
         let novo_filho = document.createElement("tr");
         let texto = "";
 
-        texto += "<td>"+ i +"</td>";  // aqui vem o Bloco
-        texto += "<td>"+ i +"</td>";  // aqui vem o Offset
-        texto += "<td>"+ i +"</td>";  // aqui vem o Estado
-        texto += "<td>"+ i +"</td>";  // aqui vem o valor
+        texto += "<td>"+ cache_usada[i].bloco +"</td>";  // aqui vem o Bloco
+        texto += "<td>"+ cache_usada[i].offset +"</td>";  // aqui vem o Offset
+        texto += "<td>"+ cache_usada[i].estado +"</td>";  // aqui vem o Estado
+        texto += "<td>"+ cache_usada[i].valor +"</td>";  // aqui vem o valor
         novo_filho.innerHTML = texto; 
         elemento_pai.appendChild(novo_filho);      
     }
