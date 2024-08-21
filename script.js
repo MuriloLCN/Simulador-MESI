@@ -39,7 +39,7 @@ function inserir_na_ram(endereco, valor)
     ram[endereco].valor = valor;
 }
 
-function buscar_na_cache(local, endereco)
+function buscar_na_cache(local, endereco, aceita_invalida)
 {
     let cache_usada;
     if (local == 1)
@@ -59,7 +59,10 @@ function buscar_na_cache(local, endereco)
     {
         if ((cache_usada[i].bloco * tamanho_bloco_memoria + cache_usada[i].offset) == endereco)
         {
-            return {dados_linha: cache_usada[i], indice: i};
+            if (cache_usada[i].estado !== "INVALIDO" || aceita_invalida == true)
+            {
+                return {dados_linha: cache_usada[i], indice: i};
+            }
         }
     }
 
@@ -73,7 +76,7 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
 
     
     // Se linha da cache já existir, sobreescreva
-    let resultado_busca = buscar_na_cache(local, endereco);
+    let resultado_busca = buscar_na_cache(local, endereco, true);
     if (resultado_busca !== null)
     {
         if (local == 1)
@@ -105,6 +108,7 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_nova_iorque.push(novo_obj);
         if (cache_nova_iorque.length > tamanho_max_cache)
         {
+            inserir_na_ram(cache_nova_iorque[0].bloco * tamanho_bloco_memoria + cache_nova_iorque[0].offset, cache_nova_iorque[0].valor);
             cache_nova_iorque = cache_nova_iorque.shift();
         }
     }
@@ -114,6 +118,7 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_berlim.push(novo_obj);
         if (cache_berlim > tamanho_max_cache)
         {
+            inserir_na_ram(cache_berlim[0].bloco * tamanho_bloco_memoria + cache_berlim[0].offset, cache_berlim[0].valor);
             cache_berlim = cache_berlim.shift();
         }
     }
@@ -123,7 +128,33 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_toquio.push(novo_obj);
         if (cache_toquio.length > tamanho_max_cache)
         {
+            inserir_na_ram(cache_toquio[0].bloco * tamanho_bloco_memoria + cache_toquio[0].offset, cache_toquio[0].valor);
             cache_toquio = cache_toquio.shift();
+        }
+    }
+}
+
+function broadcast_invalidar(endereco)
+{
+    for (let i = 0; i < cache_nova_iorque.length; i++)
+    {
+        if ((cache_nova_iorque[i].bloco * tamanho_bloco_memoria + cache_nova_iorque[i].offset) == endereco)
+        {
+            cache_nova_iorque[i].estado = "INVALIDO";
+        }
+    }
+    for (let i = 0; i < cache_berlim.length; i++)
+    {
+        if ((cache_berlim[i].bloco * tamanho_bloco_memoria + cache_berlim[i].offset) == endereco)
+        {
+            cache_berlim[i].estado = "INVALIDO";
+        }
+    }
+    for (let i = 0; i < cache_toquio.length; i++)
+    {
+        if ((cache_toquio[i].bloco * tamanho_bloco_memoria + cache_toquio[i].offset) == endereco)
+        {
+            cache_toquio[i].estado = "INVALIDO";
         }
     }
 }
@@ -132,37 +163,195 @@ function dar_lance(local, endereco, valor)
 {
     // OBS: UM LANCE SÓ PODE SER DADO SE TIVER VALOR MAIOR QUE O ATUAL
 
-    inserir_na_cache(local, endereco, valor, "TESTE");
-    // Se CACHE HIT
-    
-    // Ver estado da cópia local
-
-    // Se MODIFICADO, apenas alterar o valor
-
-    // Se EXCLUSIVO, alterar o valor e mudar o estado para MODIFIED
-
-    // Se COMPARTILHADO:
-    //    Mude o estado da linha nas outras caches para INVALIDO
-    //    Atualize a linha local
-    //    Mude o estado para MODIFICADO
+    let resultado_busca = buscar_na_cache(local, endereco, false);
 
     // Se CACHE MISS
+    if (resultado_busca == null)
+    {
+        // Read with intention to modify
 
-    // Read with intention to modify
+        // Alguma outra cache tem a cópia?
+        let outra_1, outra_2;
 
-    // Alguma outra cache tem a cópia?
-    // Se não, busque o valor da memória principal e coloque o estado MODIFICADO
+        if (local == 1)
+        {
+            outra_1 = buscar_na_cache(2, endereco, false);
+            outra_2 = buscar_na_cache(3, endereco, false);
+        }
+        else if (local == 2)
+        {
+            outra_1 = buscar_na_cache(1, endereco, false);
+            outra_2 = buscar_na_cache(3, endereco, false);   
+        }
+        else 
+        {
+            outra_1 = buscar_na_cache(1, endereco, false);
+            outra_2 = buscar_na_cache(2, endereco, false);
+        }
 
-    // Se sim:
-    // Qual é o estado delas?
+        // Se não, busque o valor da memória principal (regra de negócio), armazene caso necessário e coloque o estado MODIFICADO
+        if (outra_1 == null && outra_2 == null)
+        {
+            let mem = buscar_na_ram(endereco);
+            if (mem >= valor)
+            {
+                log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                return;
+            }
+            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+        }
+        else
+        {
+            // Se sim:
+            // Qual é o estado delas?
+            let estado_delas;
 
-    // Se MODIFICADO:
-    //    A cache que possui a cópia manda ela para a RAM e coloca ela como INVÁLIDA
-    //    A cache local busca o valor da memória e coloca o estado como MODIFICADO
+            // Se MODIFICADO:
+            //    A cache que possui a cópia manda ela para a RAM e coloca ela como INVÁLIDA
+            //    A cache local busca o valor da memória e coloca o estado como MODIFICADO
 
-    // Se EXCLUSIVO ou COMPARTILHADO:
-    //    Outros cores colocam estado como INVÁLIDO
-    //    Core local busca valor da RAM e coloca como MODIFICADO
+            // Se EXCLUSIVO ou COMPARTILHADO:
+            //    Outros cores colocam estado como INVÁLIDO
+            //    Core local busca valor da RAM e coloca como MODIFICADO
+            
+            // null, normal
+            if (outra_1 == null)
+            {
+                estado_delas = outra_2.dados_linha.estado;
+
+                if (estado_delas === "MODIFICADO")
+                {
+                    if (outra_2.dados_linha.valor >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        return;
+                    }
+
+                    inserir_na_ram(outra_2.dados_linha.bloco * tamanho_bloco_memoria + outra_2.dados_linha.offset, outra_2.dados_linha.valor);
+                    broadcast_invalidar(endereco);
+
+                    let mem = buscar_na_ram(endereco);
+                    if (mem >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        return;
+                    }
+                    inserir_na_cache(local, endereco, valor, "MODIFICADO");
+                }
+                else if (estado_delas === "EXCLUSIVO" || estado_delas === "COMPARTILHADO")
+                {
+                    if (outra_2.dados_linha.valor >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        return;
+                    }
+                    broadcast_invalidar(endereco);
+
+                    let mem = buscar_na_ram(endereco);
+                    if (mem >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        return;
+                    }
+                    inserir_na_cache(local, endereco, valor, "MODIFICADO");
+                }
+            }
+            // normal, null
+            else if (outra_2 == null)
+            {
+                estado_delas = outra_1.dados_linha.estado;
+
+                if (estado_delas === "MODIFICADO")
+                {
+                    if (outra_1.dados_linha.valor >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        return;
+                    }
+
+                    inserir_na_ram(outra_1.dados_linha.bloco * tamanho_bloco_memoria + outra_1.dados_linha.offset, outra_1.dados_linha.valor);
+                    broadcast_invalidar(endereco);
+
+                    let mem = buscar_na_ram(endereco);
+                    if (mem >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        return;
+                    }
+                    inserir_na_cache(local, endereco, valor, "MODIFICADO");
+                }
+                else if (estado_delas === "EXCLUSIVO" || estado_delas === "COMPARTILHADO")
+                {
+                    if (outra_1.dados_linha.valor >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        return;
+                    }
+                    broadcast_invalidar(endereco);
+
+                    let mem = buscar_na_ram(endereco);
+                    if (mem >= valor)
+                    {
+                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        return;
+                    }
+                    inserir_na_cache(local, endereco, valor, "MODIFICADO");
+                }
+            }
+            // normal, normal - se duas tem cópias, deve ser shared
+            else
+            {
+                if (outra_1.dados_linha.valor >= valor)
+                {
+                    log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                    return;
+                }
+                broadcast_invalidar(endereco);
+
+                let mem = buscar_na_ram(endereco);
+                if (mem >= valor)
+                {
+                    log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                    return;
+                }
+                inserir_na_cache(local, endereco, valor, "MODIFICADO")
+            }
+
+        }
+    }
+    // Se CACHE HIT
+    else 
+    {
+        // Ver estado da cópia local
+        let estado_local = resultado_busca.dados_linha.estado;
+
+        // Se MODIFICADO, apenas alterar o valor
+        // Se EXCLUSIVO, alterar o valor e mudar o estado para MODIFIED
+        if (estado_local === "MODIFICADO" || estado_local === "EXCLUSIVO")
+        {
+            if (valor <= resultado_busca.dados_linha.valor)
+            {
+                log_trace += "<br> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente"
+                return;
+            }
+            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+        }
+
+        // Se COMPARTILHADO:
+        //    Mude o estado da linha nas outras caches para INVALIDO
+        //    Atualize a linha local
+        //    Mude o estado para MODIFICADO
+        if (estado_local === "COMPARTILHADO")
+        {
+            if (valor <= resultado_busca.dados_linha.valor)
+            {
+                log_trace += "<br> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente"
+                return;
+            }
+            broadcast_invalidar(endereco);
+            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+        }
+    }
 }
 
 function buscar_preco(local, endereco)
@@ -260,11 +449,6 @@ function realizar_operacao()
     gui_atualizar_cache(3);
     gui_atualizar_ram();
 
-    log_trace += "<br> Local de operação: " + local;
-    log_trace += "<br> Operação: " + operacao;
-    log_trace += "<br> ID: " + id;
-    log_trace += "<br> Valor: " + valor;
-    log_trace += "<br> " + geradorItemAleatorio();
     // Ir realizando as operações com base nos parâmetros...
     // Cada operação vai dando append ao log_trace com as decisões que foram tomadas e por quais motivos
     // No final, esse log_trace vai ser colocado no cartão de log
