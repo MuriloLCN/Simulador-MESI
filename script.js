@@ -29,6 +29,16 @@ var cache_toquio = [];
 
 var ram = [];
 
+function buscar_na_ram(endereco)
+{
+    return ram[endereco].valor;
+}
+
+function inserir_na_ram(endereco, valor)
+{
+    ram[endereco].valor = valor;
+}
+
 function buscar_na_cache(local, endereco)
 {
     let cache_usada;
@@ -120,6 +130,8 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
 
 function dar_lance(local, endereco, valor)
 {
+    // OBS: UM LANCE SÓ PODE SER DADO SE TIVER VALOR MAIOR QUE O ATUAL
+
     inserir_na_cache(local, endereco, valor, "TESTE");
     // Se CACHE HIT
     
@@ -155,6 +167,7 @@ function dar_lance(local, endereco, valor)
 
 function buscar_preco(local, endereco)
 {
+    log_trace += "<br> " + buscar_na_cache(local, endereco).dados_linha.valor;
     // Se CACHE HIT, apenas retornar o valor
 
     // Se CACHE MISS:
@@ -222,8 +235,22 @@ function realizar_operacao()
     }
 
     // Verificar se o ID é um valor numérico válido
+    id = parseInt(id);
+
+    if (Number.isNaN(id))
+    {
+        alert("Id deve ser um número");
+        return;
+    }
 
     // Verificar se o valor é um número válido
+    valor = parseInt(valor);
+
+    if (Number.isNaN(valor))
+    {
+        alert("Valor deve ser um número");
+        return;
+    }
 
     // Realizar MESI
     entrada_mesi(operacao, valor, id, local);
