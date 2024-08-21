@@ -7,7 +7,7 @@
 
     Alunos:
         Murilo Luis Calvo Neves | RA 129037
-        Leandro Silva Novakosky | RA
+        Leandro Silva Novakosky | RA 129849
 */
 
 const tamanho_max_ram = 256;
@@ -15,6 +15,8 @@ const tamanho_max_cache = 16;
 const tamanho_bloco_memoria = 16;
 
 var log_trace = "";
+
+// Detalhes de estruturação
 
 // Cache:
 //    Bloco | Offset | Estado | Valor
@@ -39,16 +41,34 @@ var ram = [];
 
 function buscar_na_ram(endereco)
 {
+    /*
+        Busca um valor armazenado em um endereço na RAM
+    */
     return ram[endereco].valor;
 }
 
 function inserir_na_ram(endereco, valor)
 {
+    /*
+        Insere/Altera um endereço da RAM para ter um novo valor
+    */
     ram[endereco].valor = valor;
 }
 
 function buscar_na_cache(local, endereco, aceita_invalida)
 {
+    /*
+        Busca uma linha de cache em um determinado local
+        Entradas:
+            local: Qual cache utilizar (0: NY, 1: Berlim, 2: Tóquio)
+            endereço: O endereço de memória a ser procurado
+            aceita_invalida: Booleano que indica se a função deve retornar a linha mesmo caso ela seja inválida
+        Retorna um objeto da forma:
+            {
+                dados_linha: Objeto de linha de cache
+                indice: Indice do vetor que ela está armazenada (uso interno)
+            }
+    */
     let cache_usada;
     if (local == 1)
     {
@@ -79,6 +99,14 @@ function buscar_na_cache(local, endereco, aceita_invalida)
 
 function inserir_na_cache(local, endereco, valor_ins, estado_ins)
 {
+    /*
+        Insere dados em uma cache. Se já existe essa linha, ela é sobreescrita
+        Entradas:
+            local: Qual cache utilizar (0: NY, 1: Berlim, 2: Tóquio)
+            endereco: O endereço a qual o valor pertence
+            valor_ins: O valor a ser armazenado
+            estado_ins: O estado da linha a ser armazenada
+    */
     let bloco_ins = Math.floor(endereco / tamanho_bloco_memoria);
     let offset_ins = endereco - bloco_ins * tamanho_bloco_memoria;
 
@@ -108,7 +136,7 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
     // Se não, crie uma nova
     let novo_obj = {bloco: bloco_ins, offset: offset_ins, estado: estado_ins, valor: valor_ins};
 
-    // Se, após inserir, o tamanho extrapolar o limite, apague o primeiro valor (FIFO)
+    // Se, após inserir, o tamanho extrapolar o limite, apague o primeiro valor (FIFO) e jogue-o para a RAM (write-back)
 
     if (local == 1)
     {
@@ -145,6 +173,9 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
 
 function broadcast_invalidar(endereco)
 {
+    /*
+        Invalida todas as linhas de todas as caches que possuem um determinado endereço
+    */
     for (let i = 0; i < cache_nova_iorque.length; i++)
     {
         if ((cache_nova_iorque[i].bloco * tamanho_bloco_memoria + cache_nova_iorque[i].offset) == endereco)
@@ -170,7 +201,10 @@ function broadcast_invalidar(endereco)
 
 function dar_lance(local, endereco, valor)
 {
-    // OBS: UM LANCE SÓ PODE SER DADO SE TIVER VALOR MAIOR QUE O ATUAL
+    /*
+        Parte de escrita do protocolo MESI
+        OBS: Um lance só pode ser dado caso ele tenha valor maior que os demais lances existentes e/ou o valor atual do item
+    */
 
     let resultado_busca = buscar_na_cache(local, endereco, false);
 
@@ -392,6 +426,10 @@ function buscar_preco(local, endereco)
 
 function entrada_mesi(operacao, valor, endereco, local)
 {
+    /*
+        Ponto de entrada do protocolo MESI
+    */
+
     // Se endereço deu OVERFLOW, calcular rotação
     if (endereco > tamanho_max_ram)
     {
@@ -412,6 +450,11 @@ function entrada_mesi(operacao, valor, endereco, local)
 
 function realizar_operacao()
 {
+    /*
+        Ponto de entrada e de parse dos dados de input
+
+        Realiza as operações e escreve os resultados nos elementos gráficos
+    */
     // Limpando o log da operação antiga
     log_trace = "";
 
@@ -533,6 +576,9 @@ function gui_atualizar_ram()
 
 function preencher_ram()
 {
+    /*
+        Preenche a RAM com valores aleatórios. Todos os itens começam com o preço de R$1,00. Os nomes são aleatórios.
+    */
     for (let i = 0; i < tamanho_max_ram; i++)
     {
         let obj = {endereco: i, valor: 1, nome: geradorItemAleatorio()};
@@ -542,12 +588,18 @@ function preencher_ram()
 
 function inicializar_pagina()
 {
+    /*
+        Função chamada ao se abrir a página para se carregar os elementos da RAM
+    */
     preencher_ram();
     gui_atualizar_ram();
 }
 
 function geradorItemAleatorio()
 {
+    /*
+        Gera itens aleatórios
+    */
     let items = [
         "caixa de marcadores",
         "brócolis",
