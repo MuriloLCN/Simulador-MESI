@@ -2,9 +2,9 @@
 
 */
 
-const tamanho_bloco_memoria = 16;
-const tamanho_max_cache = 16;
 const tamanho_max_ram = 256;
+const tamanho_max_cache = 16;
+const tamanho_bloco_memoria = 16;
 
 var log_trace = "";
 
@@ -14,18 +14,76 @@ var log_trace = "";
 //    Offset = Endereço - Bloco * tamanho_bloco_memoria
 //    Estado = MESI
 //    Valor = Dinheiro envolvido no lance
+//    let obj = {bloco: int, offset: int, estado: str, valor: int}
 
 // RAM:
 //    Endereço | Valor | Nome
 //    Endereço = 0 até tamanho_max_ram - 1
 //    Valor = Dinheiro envolvido no lance
 //    Nome = Nome aleatório gerado
+//    let obj = {endereco: int, valor: int, nome: str};
 
-var cache_nova_iorque = [1,2,3,4,5,6,7,8,9,1,5,8,8];
-var cache_berlim = [1];
-var cache_toquio = [1,23,4,12];
+var cache_nova_iorque = [];
+var cache_berlim = [];
+var cache_toquio = [];
 
 var ram = [];
+
+function buscar_na_cache(local, endereco)
+{
+    let cache_usada;
+    if (local == 1)
+    {
+        cache_usada = cache_nova_iorque;
+    }
+    else if (local == 2)
+    {
+        cache_usada = cache_berlim;
+    }
+    else
+    {
+        cache_usada = cache_toquio;
+    }
+
+    for (let i = 0; i < cache_usada.length; i++)
+    {
+        if ((cache_usada[i].bloco * tamanho_bloco_memoria + cache_usada[i].offset) == endereco)
+        {
+            return cache_usada[i];
+        }
+    }
+
+    return null;
+}
+
+function inserir_na_cache(local, endereco, valor, estado)
+{
+    let bloco = Math.floor(endereco / tamanho_bloco_memoria);
+    let offset = endereco - bloco * tamanho_bloco_memoria;
+
+    // Se linha da cache já existir, sobreescreva
+    // Se não, crie uma nova
+
+    if (1);
+
+    // Se, após inserir, o tamanho extrapolar o limite, apague o primeiro valor (FIFO)
+
+    if (local == 1)
+    {
+        // cache_usada = cache_nova_iorque
+        
+    }
+    else if (local == 2)
+    {
+        // cache_usada = cache_berlim
+        
+    }
+    else
+    {
+        // cache_usada = cache_toquio
+        
+    }
+}
 
 function dar_lance(local, endereco, valor)
 {
@@ -89,6 +147,12 @@ function buscar_preco(local, endereco)
 
 function entrada_mesi(operacao, valor, endereco, local)
 {
+    // Se endereço deu OVERFLOW, calcular rotação
+    if (endereco > tamanho_max_ram)
+    {
+        endereco = endereco % tamanho_max_ram;
+    }
+
     if (operacao == 1)
     {
         log_trace += "<br> Iniciando operação: Dar lance (escrita) no item de endereço " + endereco + " com o valor de " + valor + " reais por meio do local " + local;
