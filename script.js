@@ -1,5 +1,13 @@
 /*
+    Trabalho Prático 1 – Simulador Protocolo MESI em uma aplicação
+    Disciplina: Arquitetura e Organização de Computadores II Código: 6895
+    Curso: Ciência da Computação Turma: 01
+    Professora: Sandra Cossul
+    Semestre: 2024/1
 
+    Alunos:
+        Murilo Luis Calvo Neves | RA 129037
+        Leandro Silva Novakosky | RA
 */
 
 const tamanho_max_ram = 256;
@@ -108,8 +116,9 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_nova_iorque.push(novo_obj);
         if (cache_nova_iorque.length > tamanho_max_cache)
         {
+            alert("teste");
             inserir_na_ram(cache_nova_iorque[0].bloco * tamanho_bloco_memoria + cache_nova_iorque[0].offset, cache_nova_iorque[0].valor);
-            cache_nova_iorque = cache_nova_iorque.shift();
+            cache_nova_iorque.shift();
         }
     }
     else if (local == 2)
@@ -119,7 +128,7 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         if (cache_berlim > tamanho_max_cache)
         {
             inserir_na_ram(cache_berlim[0].bloco * tamanho_bloco_memoria + cache_berlim[0].offset, cache_berlim[0].valor);
-            cache_berlim = cache_berlim.shift();
+            cache_berlim.shift();
         }
     }
     else
@@ -129,7 +138,7 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         if (cache_toquio.length > tamanho_max_cache)
         {
             inserir_na_ram(cache_toquio[0].bloco * tamanho_bloco_memoria + cache_toquio[0].offset, cache_toquio[0].valor);
-            cache_toquio = cache_toquio.shift();
+            cache_toquio.shift();
         }
     }
 }
@@ -443,7 +452,9 @@ function realizar_operacao()
 
     // Realizar MESI
     entrada_mesi(operacao, valor, id, local);
-        
+    
+    log_trace += "<br> Tam. caches: " + cache_nova_iorque.length + " " + cache_berlim.length + " " + cache_toquio.length;
+    
     gui_atualizar_cache(1);
     gui_atualizar_cache(2);
     gui_atualizar_cache(3);
