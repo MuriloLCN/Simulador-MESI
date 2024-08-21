@@ -219,6 +219,7 @@ function dar_lance(local, endereco, valor)
     // Se CACHE MISS
     if (resultado_busca == null)
     {
+        log_trace += "<br>&#x2022; Cache Miss: Emitindo Read With Intention to Modify";
         // Read with intention to modify
 
         // Alguma outra cache tem a cópia?
@@ -243,16 +244,19 @@ function dar_lance(local, endereco, valor)
         // Se não, busque o valor da memória principal (regra de negócio), armazene caso necessário e coloque o estado MODIFICADO
         if (outra_1 == null && outra_2 == null)
         {
+            log_trace += "<br>&#x2022; Nenhuma outra cache tem a cópia dos dados, buscando na memória";
             let mem = buscar_na_ram(endereco);
             if (mem >= valor)
             {
-                log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                log_trace += "<br>&#x2022; <span style=\"color: red\">Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                 return;
             }
+            log_trace += "<br>&#x2022; Inserindo o valor na cache atual com o estado Modificado";
             inserir_na_cache(local, endereco, valor, "MODIFICADO");
         }
         else
         {
+            log_trace += "<br>&#x2022; Outra(s) cache(s) tem a cópia do item, analisando o estado";
             // Se sim:
             // Qual é o estado delas?
             let estado_delas;
@@ -274,7 +278,7 @@ function dar_lance(local, endereco, valor)
                 {
                     if (outra_2.dados_linha.valor >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                         return;
                     }
 
@@ -284,7 +288,7 @@ function dar_lance(local, endereco, valor)
                     let mem = buscar_na_ram(endereco);
                     if (mem >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                         return;
                     }
                     inserir_na_cache(local, endereco, valor, "MODIFICADO");
@@ -293,7 +297,7 @@ function dar_lance(local, endereco, valor)
                 {
                     if (outra_2.dados_linha.valor >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente </span>";
                         return;
                     }
                     broadcast_invalidar(endereco);
@@ -301,7 +305,7 @@ function dar_lance(local, endereco, valor)
                     let mem = buscar_na_ram(endereco);
                     if (mem >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                         return;
                     }
                     inserir_na_cache(local, endereco, valor, "MODIFICADO");
@@ -316,7 +320,7 @@ function dar_lance(local, endereco, valor)
                 {
                     if (outra_1.dados_linha.valor >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        log_trace += "<br> <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                         return;
                     }
 
@@ -326,7 +330,7 @@ function dar_lance(local, endereco, valor)
                     let mem = buscar_na_ram(endereco);
                     if (mem >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        log_trace += "<br> <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                         return;
                     }
                     inserir_na_cache(local, endereco, valor, "MODIFICADO");
@@ -335,7 +339,7 @@ function dar_lance(local, endereco, valor)
                 {
                     if (outra_1.dados_linha.valor >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                        log_trace += "<br> <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                         return;
                     }
                     broadcast_invalidar(endereco);
@@ -343,7 +347,7 @@ function dar_lance(local, endereco, valor)
                     let mem = buscar_na_ram(endereco);
                     if (mem >= valor)
                     {
-                        log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                        log_trace += "<br> <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                         return;
                     }
                     inserir_na_cache(local, endereco, valor, "MODIFICADO");
@@ -354,17 +358,20 @@ function dar_lance(local, endereco, valor)
             {
                 if (outra_1.dados_linha.valor >= valor)
                 {
-                    log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente";
+                    log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                     return;
                 }
+                log_trace += "<br>&#x2022; Invalidando endereço nas outras caches";
                 broadcast_invalidar(endereco);
 
                 let mem = buscar_na_ram(endereco);
                 if (mem >= valor)
                 {
-                    log_trace += "<br> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente";
+                    log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                     return;
                 }
+
+                log_trace += "<br>&#x2022; Inserindo o valor na cache atual com o estado Modificado";
                 inserir_na_cache(local, endereco, valor, "MODIFICADO")
             }
 
@@ -375,16 +382,17 @@ function dar_lance(local, endereco, valor)
     {
         // Ver estado da cópia local
         let estado_local = resultado_busca.dados_linha.estado;
-
+        log_trace += "<br>&#x2022; Cache Hit: Analisando estado atual da linha na cache local";
         // Se MODIFICADO, apenas alterar o valor
         // Se EXCLUSIVO, alterar o valor e mudar o estado para MODIFIED
         if (estado_local === "MODIFICADO" || estado_local === "EXCLUSIVO")
         {
             if (valor <= resultado_busca.dados_linha.valor)
             {
-                log_trace += "<br> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente"
+                log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente</span>";
                 return;
             }
+            log_trace += "<br>&#x2022; Estado era ou exclusivo, alterou-se o valor e o estado foi para Modificado";
             inserir_na_cache(local, endereco, valor, "MODIFICADO");
         }
 
@@ -396,9 +404,10 @@ function dar_lance(local, endereco, valor)
         {
             if (valor <= resultado_busca.dados_linha.valor)
             {
-                log_trace += "<br> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente"
+                log_trace += "<br>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente </span>";
                 return;
             }
+            log_trace += "<br>&#x2022; Estado era compartilhado, alterou-se o valor, invalidou-se as cópias dos outros locais e mudou-se o estado para Modificado";
             broadcast_invalidar(endereco);
             inserir_na_cache(local, endereco, valor, "MODIFICADO");
         }
@@ -446,12 +455,12 @@ function entrada_mesi(operacao, valor, endereco, local)
 
     if (operacao == 1)
     {
-        log_trace += "<br> Iniciando operação: Dar lance (escrita) no item de endereço " + endereco + " com o valor de " + valor + " reais por meio do local " + local;
+        log_trace += "<br>&#x2022; Iniciando operação: Dar lance (escrita) no item de endereço " + endereco + " com o valor de " + valor + " reais por meio do local " + local;
         dar_lance(local, endereco, valor);
     }
     else if (operacao == 2)
     {
-        log_trace += "<br> Iniciando operação: Buscar preço (leitura) no item de endereço " + endereco + " por meio do local " + local;
+        log_trace += "<br>&#x2022; Iniciando operação: Buscar preço (leitura) no item de endereço " + endereco + " por meio do local " + local;
         buscar_preco(local, endereco);
     }
 }
@@ -504,7 +513,7 @@ function realizar_operacao()
     // Realizar MESI
     entrada_mesi(operacao, valor, id, local);
     
-    log_trace += "<br> Tam. caches: " + cache_nova_iorque.length + " " + cache_berlim.length + " " + cache_toquio.length;
+    log_trace += "<br>&#x2022; Nº linhas ocupadas das caches: " + cache_nova_iorque.length + " | " + cache_berlim.length + " | " + cache_toquio.length;
     
     gui_atualizar_cache(1);
     gui_atualizar_cache(2);
