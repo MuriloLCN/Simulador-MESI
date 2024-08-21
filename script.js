@@ -502,12 +502,15 @@ function realizar_operacao()
     }
 
     // Verificar se o valor é um número válido
-    valor = parseInt(valor);
-
-    if (Number.isNaN(valor))
+    if (operacao == 1)
     {
-        alert("Valor deve ser um número");
-        return;
+        valor = parseInt(valor);
+
+        if (Number.isNaN(valor))
+        {
+            alert("Valor deve ser um número");
+            return;
+        }
     }
 
     // Realizar MESI
