@@ -207,6 +207,116 @@ function broadcast_invalidar(endereco)
     }
 }
 
+function mudar_estado(local, estado){
+    /*
+        Pretende mudar o estado de uma cache entre os valores
+        SHARED, INVALIDO, EXCLUSIVO, MODIFICADO
+
+    */
+
+   
+    if(local == 1){
+        cache_nova_iorque.estado = estado;
+    }else if(local == 2){
+        cache_berlim.estado = estado;
+    }else{
+        cache_toquio.estado = estado;
+    }
+}
+
+function retornar_estado(local){
+    /*
+        Retorna o estado atual de uma cache
+    */
+    if(local == 1){
+        return cache_nova_iorque.estado;
+    }else if(local == 2){
+        return cache_berlim.estado;
+    }else{
+        return cache_toquio.estado;
+    }
+}
+
+function ver_copias(local, endereco){
+
+    /*
+        Verifica se existem copias de um valor em outras caches
+    */
+
+    var cache;
+
+    if(local == 1){
+
+        if(buscar_na_cache(2, endereco, false) != null){
+            cache = 2;
+        }
+        if(buscar_na_cache(3, endereco, false) != null){
+            cache = 3;
+        }
+
+    }else if(local == 2){
+
+        if(buscar_na_cache(1, endereco, false) != null){
+            cache = 1;
+        }
+        if(buscar_na_cache(3, endereco, false) != null){
+            cache = 3;
+        }
+
+    }else{
+
+        if(buscar_na_cache(2, endereco, false) != null){
+            cache = 2;
+        }
+        if(buscar_na_cache(1, endereco, false) != null){
+            cache = 1;
+        }
+
+    }
+
+    return cache;
+}
+
+function contar_copias(local, endereco){
+
+    /*
+        Verifica quantas caches possuem copias
+    */
+
+    var qtd;
+
+    if(local == 1){
+
+        if(buscar_na_cache(2, endereco, false) != null){
+            qtd++;
+        }
+        if(buscar_na_cache(3, endereco, false) != null){
+            qtd++;
+        }
+
+    }else if(local == 2){
+
+        if(buscar_na_cache(1, endereco, false) != null){
+            qtd++;
+        }
+        if(buscar_na_cache(3, endereco, false) != null){
+            qtd++;
+        }
+
+    }else{
+
+        if(buscar_na_cache(2, endereco, false) != null){
+            qtd++;
+        }
+        if(buscar_na_cache(1, endereco, false) != null){
+            qtd++;
+        }
+
+    }
+
+    return qtd;
+}
+
 function dar_lance(local, endereco, valor)
 {
     /*
@@ -416,29 +526,80 @@ function dar_lance(local, endereco, valor)
 
 function buscar_preco(local, endereco)
 {
-    log_trace += "<br> " + buscar_na_cache(local, endereco).dados_linha.valor;
+
+    var cache_hit = buscar_na_cache(local, endereco, false).dados_linha.valor;
+    var valor = null;
+    var cache_copia_qtd = 0;
+    
     // Se CACHE HIT, apenas retornar o valor
+    
+    if(cache_hit != null){
 
-    // Se CACHE MISS:
+        log_trace += "<br>&#x2022; Cache Hit, encontrado o valor: " + cache_hit + " reais";
+        
+    }
+    else{ // Se CACHE MISS:
+        // Verificar o número de cores com a cópia
 
-    // Verificar o número de cores com a cópia
+        log_trace += "<br>&#x2022; Valor não encontrado, procurando cópias";
 
-    // Se nenhum tem cópia:
-    //    Pegar dado da memória
-    //    Guardar na cache adequada (do local) com o estado EXCLUSIVO
+        cache_copia = ver_copias(local,endereco);
+        cache_copia_qtd = contar_copias(local,endereco);
+        
+        if(cache_copia_qtd == 0){// Se nenhum tem cópia:
+            
+            //    Pegar dado da memória
+            //    Guardar na cache adequada (do local) com o estado EXCLUSIVO
+            
+            valor = buscar_na_ram(endereco);
+            inserir_na_cache(local, endereco, valor, "EXCLUSIVO");
+        
+        }else if(cache_copia_qtd == 1){// Se 1 cache tem a cópia:
+            
+            if(retornar_estado(cache_copia) == "EXCLUSIVO"){//    Se a cópia está no estado EXCLUSIVO
+                
+                //       Copie o valor para a cache local com o estado SHARED
+                //       Troque o estado da cache de origem para SHARED
+                
+                valor = buscar_na_cache(cache_copia, endereco, false).dados_linha.valor;
+                inserir_na_cache(local, endereco, valor, "SHARED");
+                mudar_estado(cache_copia, "SHARED");
 
-    // Se 1 cache tem a cópia:
-    //    Se a cópia está no estado EXCLUSIVO
-    //       Copie o valor para a cache local com o estado SHARED
-    //       Troque o estado da cache de origem para SHARED
-    //    Se a cópia está no estado MODIFICADO
-    //       Coloque o valor da cópia na RAM
-    //       Copie o valor para a cache local com o estado SHARED
-    //       Altere o estado da cache de origem para SHARED
+            }else if(retornar_estado(cache_copia) == "MODIFICADO"){//       Se a cópia está no estado MODIFICADO
+            
+                //       Coloque o valor da cópia na RAM
+                
+                valor = buscar_na_cache(cache_copia, endereco, false);
+                inserir_na_ram(endereco, valor);
+            
+                //       Copie o valor para a cache local com o estado SHARED
+            
+                inserir_na_cache(local, endereco, valor, "SHARED");
+            
+                //       Altere o estado da cache de origem para SHARED
+            
+                mudar_estado(cache_copia, "SHARED");
+            }
 
-    // Se mais de um tem a cópia:
-    //    Recebe o valor de qualquer cache
-    //    Altere o estado da cache local para SHARED
+        }else{// Se mais de um tem a cópia:
+
+            //    Recebe o valor de qualquer cache
+            //    Altere o estado da cache local para SHARED
+
+            if(local != 1){
+            
+                valor = buscar_na_cache(1, endereco, false).dados_linha.valor;
+            
+            }else{
+            
+                valor = buscar_na_cache(2, endereco, false).dados_linha.valor;
+            
+            }
+            
+            inserir_na_cache(local,endereco,valor,"SHARED");
+        }
+        
+    }
 }
 
 function entrada_mesi(operacao, valor, endereco, local)
