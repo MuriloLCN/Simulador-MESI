@@ -155,9 +155,9 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
     {
         // cache_usada = cache_berlim
         cache_berlim.push(novo_obj);
-        if (cache_berlim > tamanho_max_cache)
+        if (cache_berlim.length > tamanho_max_cache)
         {
-            if (cache_nova_iorque[0].estado !== "INVALIDO")
+            if (cache_berlim[0].estado !== "INVALIDO")
             {
                 inserir_na_ram(cache_berlim[0].bloco * tamanho_bloco_memoria + cache_berlim[0].offset, cache_berlim[0].valor);
             }
@@ -170,7 +170,7 @@ function inserir_na_cache(local, endereco, valor_ins, estado_ins)
         cache_toquio.push(novo_obj);
         if (cache_toquio.length > tamanho_max_cache)
         {
-            if (cache_nova_iorque[0].estado !== "INVALIDO")
+            if (cache_toquio[0].estado !== "INVALIDO")
             {
                 inserir_na_ram(cache_toquio[0].bloco * tamanho_bloco_memoria + cache_toquio[0].offset, cache_toquio[0].valor);
             }
