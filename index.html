@@ -15,10 +15,10 @@
         <div class="caixa-externa"> <!-- Caixa externa -->
             <div class="lado-esquerdo"> <!-- Lado esquerdo -->
                 <div class="entrada-usuario"> <!-- Entrada do usuário-->
-                    <div> <!-- Caixa de texto onde vão ter os elementos de entrada-->
-                        <div class="card" style="background-color: aliceblue;">
+                    <div style="width: 100%;"> <!-- Caixa de texto onde vão ter os elementos de entrada-->
+                        <div class="card" style="background-color: aliceblue; height: 100%; ">
                             <div class="card-body">
-                                <div class="input-group">
+                                <div class="input-group" style="height: 30%;">
                                     <label class="input-group-text" for="inputLocal">Local</label>
                                     <select class="form-select" id="inputLocal">
                                         <option selected value="1">Nova Iorque</option>
@@ -32,7 +32,7 @@
                                         <option value="2">Buscar preço</option>
                                     </select>
                                 </div>
-                                <div class="input-group" style="margin-top: 4px;">
+                                <div class="input-group" style="margin-top: 25px; height: 30%;">
 
                                     <span class="input-group-text" id="inputId">ID</span>
                                     <input type="text" class="form-control" placeholder="ID do item" aria-label="ID do item" aria-describedby="inputId" id="inputIdValor">
@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="log-execucao"> <!-- Log de execução -->
-                    <div class="card" style="width: 100%; background-color:seashell; font-size: x-large;">
+                    <div class="card" style="width: 100%; background-color:seashell; font-size: x-large; overflow: scroll; overflow-x: hidden;">
                         <div class="card-body" id="log-trace">
                             Log<hr>
                         </div>
@@ -58,7 +58,7 @@
                 <div class="parte-cima"> <!-- Parte de cima - Caches -->
                     <div class="caixa-cache">
                         <div class="card" style="width: 100%; background-color:rgb(239, 255, 239);">
-                            <div class="card-body" style="overflow: scroll; overflow-x: hidden;">
+                            <div class="card-body" style="overflow: scroll; overflow-x: scroll;">
                                 Nova Iorque
                                 <div id="ny-cache">
                                     <table class="table">
@@ -80,7 +80,7 @@
                     </div>
                     <div class="caixa-cache">
                         <div class="card" style="width: 100%; background-color:rgb(239, 255, 239);">
-                            <div class="card-body" style="overflow: scroll; overflow-x: hidden;">
+                            <div class="card-body" style="overflow: scroll; overflow-x: scroll;">
                                 Berlim
                                 <div id="be-cache">
                                     <table class="table">
@@ -102,7 +102,7 @@
                     </div>
                     <div class="caixa-cache">
                         <div class="card" style="width: 100%; background-color:rgb(239, 255, 239);">
-                            <div class="card-body" style="overflow: scroll; overflow-x: hidden;">
+                            <div class="card-body" style="overflow: scroll; overflow-x: scroll;">
                                 Tóquio
                                 <div id="tk-cache">
                                     <table class="table">
