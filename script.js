@@ -39,6 +39,22 @@ var cache_toquio = [];
 
 var ram = [];
 
+var linhas_1 = [];
+var linhas_2 = [];
+var linhas_3 = [];
+
+function item_aleatorio(arr)
+{
+    /*
+        Remove um item aleatório de um vetor e remove-o dele
+    */
+    let idx = Math.ceil(Math.random() * arr.length - 1);
+
+    let element = arr[idx];
+    arr.splice(idx, 1);
+    return element;
+}
+
 function calcula_inicio_bloco(endereco)
 {
     /*
@@ -188,12 +204,9 @@ function inserir_bloco_na_cache(local, bloco_ins, estado_ins, valores)
 
     if (local == 1)
     {
-        for (let n = 0; n < tamanho_bloco_memoria; n++)
+        if ((cache_nova_iorque.length + 1) / tamanho_bloco_memoria > tamanho_max_cache)
         {
-            cache_nova_iorque.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
-        }
-        if (cache_nova_iorque.length / tamanho_bloco_memoria > tamanho_max_cache)
-        {
+            linhas_1.push(cache_nova_iorque[0].linha);
             for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
                 if (cache_nova_iorque[0].estado !== "INVALIDO")
@@ -203,16 +216,17 @@ function inserir_bloco_na_cache(local, bloco_ins, estado_ins, valores)
                 cache_nova_iorque.shift();
             }
         }
+        let linha_aleatoria = item_aleatorio(linhas_1);
+        for (let n = 0; n < tamanho_bloco_memoria; n++)
+        {
+            cache_nova_iorque.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n], linha: linha_aleatoria});
+        }
     }
     else if (local == 2)
     {
-        // cache_usada = cache_berlim
-        for (let n = 0; n < tamanho_bloco_memoria; n++)
+        if ((cache_berlim.length + 1) / tamanho_bloco_memoria > tamanho_max_cache)
         {
-            cache_berlim.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
-        }
-        if (cache_berlim.length / tamanho_bloco_memoria > tamanho_max_cache)
-        {
+            linhas_2.push(cache_berlim[0].linha);
             for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
                 if (cache_berlim[0].estado !== "INVALIDO")
@@ -222,15 +236,17 @@ function inserir_bloco_na_cache(local, bloco_ins, estado_ins, valores)
                 cache_berlim.shift();
             }
         }
+        let linha_aleatoria = item_aleatorio(linhas_2);
+        for (let n = 0; n < tamanho_bloco_memoria; n++)
+        {
+            cache_berlim.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n], linha: linha_aleatoria});
+        }
     }
     else
     {
-        for (let n = 0; n < tamanho_bloco_memoria; n++)
+        if ((cache_toquio.length + 1) / tamanho_bloco_memoria > tamanho_max_cache)
         {
-            cache_toquio.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
-        }
-        if (cache_toquio.length / tamanho_bloco_memoria > tamanho_max_cache)
-        {
+            linhas_3.push(cache_toquio[0].linha);
             for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
                 if (cache_toquio[0].estado !== "INVALIDO")
@@ -239,6 +255,11 @@ function inserir_bloco_na_cache(local, bloco_ins, estado_ins, valores)
                 }
                 cache_toquio.shift();
             }
+        }
+        let linha_aleatoria = item_aleatorio(linhas_3);
+        for (let n = 0; n < tamanho_bloco_memoria; n++)
+        {
+            cache_toquio.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n], linha: linha_aleatoria});
         }
     }
 }
@@ -699,6 +720,7 @@ function gui_atualizar_cache(cache)
         let novo_filho = document.createElement("tr");
         let texto = "";
 
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].linha + "</td>";
         texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].bloco +"</td>";  // aqui vem o Bloco
         texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].offset +"</td>";  // aqui vem o Offset
         texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].estado +"</td>";  // aqui vem o Estado
@@ -756,6 +778,13 @@ function inicializar_pagina()
         let g = Math.floor(Math.random() * 255);
         let b = Math.floor(Math.random() * 255);
         cores_blocos.push("style=\"background: rgba(" + r + "," + g + "," + b + ",.1);\"");
+    }
+
+    for (let i = 0; i < tamanho_max_cache; i++)
+    {
+        linhas_1.push(i);
+        linhas_2.push(i);
+        linhas_3.push(i);
     }
 }
 
