@@ -11,7 +11,7 @@
 */
 
 const tamanho_max_ram = 256;
-const tamanho_max_cache = 20;
+const tamanho_max_cache = 8;
 const tamanho_bloco_memoria = 4;
 
 var log_trace = "";
