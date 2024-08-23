@@ -85,7 +85,7 @@ function inserir_bloco_na_ram(bloco, lista_valores)
     */
     for (let n = 0; n < tamanho_bloco_memoria; n++)
     {
-        inserir_na_ram(bloco + n, lista_valores[n]);
+        inserir_na_ram(bloco * tamanho_bloco_memoria + n, lista_valores[n]);
     }
 }
 
@@ -271,7 +271,7 @@ function broadcast_invalidar(bloco)
     }
 }
 
-function dar_lance(local, endereco, valor)
+function dar_lance(local, endereco, valor_ins)
 {
     /*
         Parte de escrita do protocolo MESI
@@ -316,13 +316,13 @@ function dar_lance(local, endereco, valor)
         {
             log_trace += "<hr>&#x2022; Nenhuma outra cache tem a cópia dos dados, buscando na memória";
             let valores_ram = buscar_bloco_na_ram(bloco);
-            if (valores_ram[offset] >= valor)
+            if (valores_ram[offset] >= valor_ins)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\">Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                 return;
             }
             log_trace += "<hr>&#x2022; Inserindo o valor na cache atual com o estado Modificado";
-            valores_ram[offset] = valor;
+            valores_ram[offset] = valor_ins;
             inserir_bloco_na_cache(local, bloco, "MODIFICADO", valores_ram);
         }
         // Se sim:
@@ -339,7 +339,7 @@ function dar_lance(local, endereco, valor)
         {
             log_trace += "<hr>&#x2022; Outra cache tem a cópia do item, analisando o estado...";
             
-            if (outra_1[offset].dados_linha.valor >= valor)
+            if (outra_1[offset].dados_linha.valor >= valor_ins)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                 return;
@@ -359,14 +359,14 @@ function dar_lance(local, endereco, valor)
             broadcast_invalidar(bloco);
 
             let bloco_memoria = buscar_bloco_na_ram(endereco);
-            bloco_memoria[offset] = valor;
+            bloco_memoria[offset] = valor_ins;
             inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         }
         if (outra_1 === null && outra_2 !== null)
         {
             log_trace += "<hr>&#x2022; Outra cache tem a cópia do item, analisando o estado...";
             
-            if (outra_2[offset].dados_linha.valor >= valor)
+            if (outra_2[offset].dados_linha.valor >= valor_ins)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                 return;
@@ -386,7 +386,7 @@ function dar_lance(local, endereco, valor)
             broadcast_invalidar(bloco);
 
             let bloco_memoria = buscar_bloco_na_ram(endereco);
-            bloco_memoria[offset] = valor;
+            bloco_memoria[offset] = valor_ins;
             inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         } 
         if (outra_1 !== null && outra_2 !== null)
@@ -394,7 +394,7 @@ function dar_lance(local, endereco, valor)
             // Para chegar aqui, o dado deve estar compartilhado
             log_trace += "<hr>&#x2022; As outras duas caches têm cópias do dado, analisando...";
 
-            if (outra_1[offset].dados_linha.valor >= valor || outra_2[offset].dados_linha.valor >= valor)
+            if (outra_1[offset].dados_linha.valor >= valor_ins || outra_2[offset].dados_linha.valor >= valor_ins)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                 return;
@@ -403,7 +403,7 @@ function dar_lance(local, endereco, valor)
             broadcast_invalidar(bloco);
 
             let bloco_memoria = buscar_bloco_na_ram(endereco);
-            bloco_memoria[offset] = valor;
+            bloco_memoria[offset] = valor_ins;
             inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         }
     }
@@ -417,13 +417,13 @@ function dar_lance(local, endereco, valor)
         // Se EXCLUSIVO, alterar o valor e mudar o estado para MODIFIED
         if (estado_local === "MODIFICADO" || estado_local === "EXCLUSIVO")
         {
-            if (valor <= resultado_busca[offset].dados_linha.valor)
+            if (valor_ins <= resultado_busca[offset].dados_linha.valor)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente</span>";
                 return;
             }
             log_trace += "<hr>&#x2022; Estado era modificado ou exclusivo, alterou-se o valor e o estado foi para Modificado";
-            resultado_busca[offset].dados_linha.valor = valor;
+            resultado_busca[offset].dados_linha.valor = valor_ins;
             let temp = [];
             for (let p = 0; p < tamanho_bloco_memoria; p++)
             {
@@ -438,14 +438,14 @@ function dar_lance(local, endereco, valor)
         //    Mude o estado para MODIFICADO
         if (estado_local === "COMPARTILHADO")
         {
-            if (valor <= resultado_busca.dados_linha.valor)
+            if (valor_ins <= resultado_busca[offset].dados_linha.valor)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente </span>";
                 return;
             }
             log_trace += "<hr>&#x2022; Estado era compartilhado, alterou-se o valor, invalidou-se as cópias dos outros locais e mudou-se o estado para Modificado";
             broadcast_invalidar(bloco);
-            resultado_busca[offset].dados_linha.valor = valor;
+            resultado_busca[offset].dados_linha.valor = valor_ins;
             let temp = [];
             for (let p = 0; p < tamanho_bloco_memoria; p++)
             {
@@ -529,7 +529,7 @@ function buscar_preco(local, endereco)
                 {
                     log_trace += "<hr>&#x2022; Dado estava modificado, armazenando ele...";
                     
-                    inserir_bloco_na_ram(endereco, temp);
+                    inserir_bloco_na_ram(bloco, temp);
                 }
                 inserir_bloco_na_cache(c_1, bloco, "COMPARTILHADO", temp);
                 inserir_bloco_na_cache(local, bloco, "COMPARTILHADO", temp);
@@ -549,7 +549,7 @@ function buscar_preco(local, endereco)
                 {
                     log_trace += "<hr>&#x2022; Dado estava modificado, armazenando ele...";
                     
-                    inserir_bloco_na_ram(endereco, temp);
+                    inserir_bloco_na_ram(bloco, temp);
                 }
                 inserir_bloco_na_cache(c_2, bloco, "COMPARTILHADO", temp);
                 inserir_bloco_na_cache(local, bloco, "COMPARTILHADO", temp);

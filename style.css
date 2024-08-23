@@ -13,7 +13,7 @@ body { margin: 0; padding: 0; }
     display: flex;
     justify-content: flex-start;
     flex-direction: column;
-    width: 35%;
+    width: 25%;
     height: 100%;
     /* background-color: aqua; */
 }
@@ -42,7 +42,7 @@ body { margin: 0; padding: 0; }
     display: flex;
     justify-content: flex-start;
     flex-direction: column;
-    width: 65%;
+    width: 75%;
     height: 100%;
     /* background-color: chartreuse; */
 }
