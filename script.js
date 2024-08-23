@@ -211,7 +211,7 @@ function inserir_bloco_na_cache(local, bloco_ins, estado_ins, valores)
         {
             cache_berlim.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
         }
-        if (cache_berlim.length > tamanho_max_cache)
+        if (cache_berlim.length / tamanho_bloco_memoria > tamanho_max_cache)
         {
             for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
@@ -229,7 +229,7 @@ function inserir_bloco_na_cache(local, bloco_ins, estado_ins, valores)
         {
             cache_toquio.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
         }
-        if (cache_toquio.length > tamanho_max_cache)
+        if (cache_toquio.length / tamanho_bloco_memoria > tamanho_max_cache)
         {
             for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
@@ -650,7 +650,7 @@ function realizar_operacao()
     // Realizar MESI
     entrada_mesi(operacao, valor, id, local);
     
-    log_trace += "<hr><br>&#x2022; Nº linhas ocupadas das caches: " + cache_nova_iorque.length + " | " + cache_berlim.length + " | " + cache_toquio.length;
+    log_trace += "<hr><br>&#x2022; Nº linhas ocupadas das caches: " + cache_nova_iorque.length / tamanho_bloco_memoria + " | " + cache_berlim.length / tamanho_bloco_memoria + " | " + cache_toquio.length / tamanho_bloco_memoria;
     
     gui_atualizar_cache(1);
     gui_atualizar_cache(2);
@@ -663,6 +663,8 @@ function realizar_operacao()
 
     document.getElementById("log-trace").innerHTML = log_trace;
 }
+
+let cores_blocos = [];
 
 function gui_atualizar_cache(cache)
 {
@@ -692,18 +694,18 @@ function gui_atualizar_cache(cache)
 
     elemento_pai.innerHTML = "";
 
-    
     for (let i = 0; i < cache_usada.length; i++)
     {
         let novo_filho = document.createElement("tr");
         let texto = "";
 
-        texto += "<td>"+ cache_usada[i].bloco +"</td>";  // aqui vem o Bloco
-        texto += "<td>"+ cache_usada[i].offset +"</td>";  // aqui vem o Offset
-        texto += "<td>"+ cache_usada[i].estado +"</td>";  // aqui vem o Estado
-        texto += "<td>"+ cache_usada[i].valor +"</td>";  // aqui vem o valor
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].bloco +"</td>";  // aqui vem o Bloco
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].offset +"</td>";  // aqui vem o Offset
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].estado +"</td>";  // aqui vem o Estado
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].valor +"</td>";  // aqui vem o valor
         novo_filho.innerHTML = texto; 
         elemento_pai.appendChild(novo_filho);      
+
     }
 }
 
@@ -747,6 +749,14 @@ function inicializar_pagina()
     */
     preencher_ram();
     gui_atualizar_ram();
+
+    for (let i = 0; i < tamanho_max_ram / tamanho_bloco_memoria; i++)
+    {
+        let r = Math.floor(Math.random() * 255);
+        let g = Math.floor(Math.random() * 255);
+        let b = Math.floor(Math.random() * 255);
+        cores_blocos.push("style=\"background: rgba(" + r + "," + g + "," + b + ",.1);\"");
+    }
 }
 
 function geradorItemAleatorio()
