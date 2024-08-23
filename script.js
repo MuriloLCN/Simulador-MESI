@@ -63,15 +63,7 @@ function calcula_inicio_bloco(endereco)
     return Math.floor(endereco / tamanho_bloco_memoria);
 }
 
-function buscar_na_ram(endereco)
-{
-    /*
-        Busca um valor armazenado em um endereço na RAM
-    */
-    return ram[endereco].valor;
-}
-
-function buscar_bloco_na_ram(endereco)
+function buscar_bloco_na_ram(bloco)
 {
     /*
         Busca um bloco de dados da RAM com base em um endereço
@@ -80,7 +72,7 @@ function buscar_bloco_na_ram(endereco)
 
     for (let n = 0; n < tamanho_bloco_memoria; n++)
     {
-        resultado.push(buscar_na_ram(calcula_inicio_bloco(endereco) + n));
+        resultado.push(ram[bloco * tamanho_bloco_memoria + n].valor);
     }
 
     return resultado;
@@ -302,7 +294,6 @@ function dar_lance(local, endereco, valor_ins)
     let offset = endereco % tamanho_bloco_memoria;
 
     let resultado_busca = buscar_bloco_na_cache(local, bloco, false);
-    console.log(resultado_busca);
 
     // Se CACHE MISS
     if (resultado_busca == null)
@@ -379,7 +370,7 @@ function dar_lance(local, endereco, valor_ins)
 
             broadcast_invalidar(bloco);
 
-            let bloco_memoria = buscar_bloco_na_ram(endereco);
+            let bloco_memoria = buscar_bloco_na_ram(bloco);
             bloco_memoria[offset] = valor_ins;
             inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         }
@@ -406,7 +397,7 @@ function dar_lance(local, endereco, valor_ins)
 
             broadcast_invalidar(bloco);
 
-            let bloco_memoria = buscar_bloco_na_ram(endereco);
+            let bloco_memoria = buscar_bloco_na_ram(bloco);
             bloco_memoria[offset] = valor_ins;
             inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         } 
@@ -423,7 +414,7 @@ function dar_lance(local, endereco, valor_ins)
 
             broadcast_invalidar(bloco);
 
-            let bloco_memoria = buscar_bloco_na_ram(endereco);
+            let bloco_memoria = buscar_bloco_na_ram(bloco);
             bloco_memoria[offset] = valor_ins;
             inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         }
@@ -522,7 +513,7 @@ function buscar_preco(local, endereco)
             // Se nenhum tem cópia:
             //    Pegar dado da memória
             //    Guardar na cache adequada (do local) com o estado EXCLUSIVO
-            let dados_bloco = buscar_bloco_na_ram(endereco);
+            let dados_bloco = buscar_bloco_na_ram(bloco);
             inserir_bloco_na_cache(local, bloco, "EXCLUSIVO", dados_bloco);
             log_trace += "<hr>Valor encontrado: R$" + dados_bloco[offset];
         }
