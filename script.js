@@ -11,8 +11,8 @@
 */
 
 const tamanho_max_ram = 256;
-const tamanho_max_cache = 16;
-const tamanho_bloco_memoria = 16;
+const tamanho_max_cache = 20;
+const tamanho_bloco_memoria = 4;
 
 var log_trace = "";
 
@@ -39,12 +39,35 @@ var cache_toquio = [];
 
 var ram = [];
 
+function calcula_inicio_bloco(endereco)
+{
+    /*
+        Calcula o endereço onde um bloco começa
+    */
+    return Math.floor(endereco / tamanho_bloco_memoria);
+}
+
 function buscar_na_ram(endereco)
 {
     /*
         Busca um valor armazenado em um endereço na RAM
     */
     return ram[endereco].valor;
+}
+
+function buscar_bloco_na_ram(endereco)
+{
+    /*
+        Busca um bloco de dados da RAM com base em um endereço
+    */
+    let resultado = [];
+
+    for (let n = 0; n < tamanho_bloco_memoria; n++)
+    {
+        resultado.push(buscar_na_ram(calcula_inicio_bloco(endereco) + n));
+    }
+
+    return resultado;
 }
 
 function inserir_na_ram(endereco, valor)
@@ -55,19 +78,32 @@ function inserir_na_ram(endereco, valor)
     ram[endereco].valor = valor;
 }
 
-function buscar_na_cache(local, endereco, aceita_invalida)
+function inserir_bloco_na_ram(bloco, lista_valores)
 {
     /*
-        Busca uma linha de cache em um determinado local
+        Insere um bloco de valores na RAM
+    */
+    for (let n = 0; n < tamanho_bloco_memoria; n++)
+    {
+        inserir_na_ram(bloco + n, lista_valores[n]);
+    }
+}
+
+function buscar_bloco_na_cache(local, bloco, aceita_invalida)
+{
+    /*
+        Busca um bloco da uma cache
         Entradas:
             local: Qual cache utilizar (0: NY, 1: Berlim, 2: Tóquio)
-            endereço: O endereço de memória a ser procurado
+            bloco: Qual bloco a ser procurado
             aceita_invalida: Booleano que indica se a função deve retornar a linha mesmo caso ela seja inválida
-        Retorna um objeto da forma:
-            {
-                dados_linha: Objeto de linha de cache
-                indice: Indice do vetor que ela está armazenada (uso interno)
-            }
+        Retorna um vetor de objetos da forma:
+        {
+            [
+                dados_linha: Objeto com um vetor contendo os dados da linha
+                indice: Indice inicial do vetor que ela está armazenada (uso interno)
+            ]
+        }
     */
     let cache_usada;
     if (local == 1)
@@ -83,124 +119,152 @@ function buscar_na_cache(local, endereco, aceita_invalida)
         cache_usada = cache_toquio;
     }
 
+    let resultado = [];
+
     for (let i = 0; i < cache_usada.length; i++)
     {
-        if ((cache_usada[i].bloco * tamanho_bloco_memoria + cache_usada[i].offset) == endereco)
+        if ((cache_usada[i].bloco) == bloco)
         {
             if (cache_usada[i].estado !== "INVALIDO" || aceita_invalida == true)
             {
-                return {dados_linha: cache_usada[i], indice: i};
+                resultado.push({dados_linha: cache_usada[i], indice: i})
             }
         }
     }
 
-    return null;
+    if (resultado.length == 0)
+    {
+        return null;
+    }
+
+    return resultado;
 }
 
-function inserir_na_cache(local, endereco, valor_ins, estado_ins)
+function inserir_bloco_na_cache(local, bloco_ins, estado_ins, valores)
 {
     /*
-        Insere dados em uma cache. Se já existe essa linha, ela é sobreescrita
+        Insere dados em uma cache. Se a linha já existe, ela é sobreescrita
         Entradas:
             local: Qual cache utilizar (0: NY, 1: Berlim, 2: Tóquio)
-            endereco: O endereço a qual o valor pertence
-            valor_ins: O valor a ser armazenado
-            estado_ins: O estado da linha a ser armazenada
+            bloco: O bloco a ser inserido/modificado
+            estado: O estado da linha a ser armazenada
+            valores: Um vetor contendo os valores a serem armazenados
     */
-    let bloco_ins = Math.floor(endereco / tamanho_bloco_memoria);
-    let offset_ins = endereco - bloco_ins * tamanho_bloco_memoria;
-
-    
-    // Se linha da cache já existir, sobreescreva
-    let resultado_busca = buscar_na_cache(local, endereco, true);
+    let resultado_busca = buscar_bloco_na_cache(local, bloco_ins, true);
+    // Se a linha já existe
     if (resultado_busca !== null)
     {
         if (local == 1)
         {
-            cache_nova_iorque[resultado_busca.indice].valor = valor_ins;
-            cache_nova_iorque[resultado_busca.indice].estado = estado_ins;
+            for (let n = 0; n < tamanho_bloco_memoria; n++)
+            {
+                cache_nova_iorque[resultado_busca[n].indice].valor = valores[n];
+                cache_nova_iorque[resultado_busca[n].indice].estado = estado_ins;
+            }
         }
         else if (local == 2)
         {
-            cache_berlim[resultado_busca.indice].valor = valor_ins;
-            cache_berlim[resultado_busca.indice].estado = estado_ins;
+            for (let n = 0; n < tamanho_bloco_memoria; n++)
+            {
+                cache_berlim[resultado_busca[n].indice].valor = valores[n];
+                cache_berlim[resultado_busca[n].indice].estado = estado_ins;
+            }
         }
         else
         {
-            cache_toquio[resultado_busca.indice].valor = valor_ins;
-            cache_toquio[resultado_busca.indice].estado = estado_ins;
+            for (let n = 0; n < tamanho_bloco_memoria; n++)
+            {
+                cache_toquio[resultado_busca[n].indice].valor = valores[n];
+                cache_toquio[resultado_busca[n].indice].estado = estado_ins;
+            }
         }
         return;
     }
                 
-    // Se não, crie uma nova
-    let novo_obj = {bloco: bloco_ins, offset: offset_ins, estado: estado_ins, valor: valor_ins};
+    // Se não, insira a linha nova
+    //let novo_obj = {bloco: bloco_ins, offset: offset_ins, estado: estado_ins, valor: valor_ins};
 
     // Se, após inserir, o tamanho extrapolar o limite, apague o primeiro valor (FIFO) e jogue-o para a RAM (write-back)
 
     if (local == 1)
     {
-        // cache_usada = cache_nova_iorque
-        cache_nova_iorque.push(novo_obj);
-        if (cache_nova_iorque.length > tamanho_max_cache)
+        for (let n = 0; n < tamanho_bloco_memoria; n++)
         {
-            if (cache_nova_iorque[0].estado !== "INVALIDO")
+            cache_nova_iorque.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
+        }
+        if (cache_nova_iorque.length / tamanho_bloco_memoria > tamanho_max_cache)
+        {
+            for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
-                inserir_na_ram(cache_nova_iorque[0].bloco * tamanho_bloco_memoria + cache_nova_iorque[0].offset, cache_nova_iorque[0].valor);
+                if (cache_nova_iorque[0].estado !== "INVALIDO")
+                {
+                    inserir_na_ram(cache_nova_iorque[0].bloco * tamanho_bloco_memoria + cache_nova_iorque[0].offset, cache_nova_iorque[0].valor);
+                }
+                cache_nova_iorque.shift();
             }
-            cache_nova_iorque.shift();
         }
     }
     else if (local == 2)
     {
         // cache_usada = cache_berlim
-        cache_berlim.push(novo_obj);
-        if (cache_berlim.length > tamanho_max_cache)
+        for (let n = 0; n < tamanho_bloco_memoria; n++)
         {
-            if (cache_berlim[0].estado !== "INVALIDO")
+            cache_berlim.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
+        }
+        if (cache_berlim.length / tamanho_bloco_memoria > tamanho_max_cache)
+        {
+            for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
-                inserir_na_ram(cache_berlim[0].bloco * tamanho_bloco_memoria + cache_berlim[0].offset, cache_berlim[0].valor);
+                if (cache_berlim[0].estado !== "INVALIDO")
+                {
+                    inserir_na_ram(cache_berlim[0].bloco * tamanho_bloco_memoria + cache_berlim[0].offset, cache_berlim[0].valor);
+                }
+                cache_berlim.shift();
             }
-            cache_berlim.shift();
         }
     }
     else
     {
-        // cache_usada = cache_toquio
-        cache_toquio.push(novo_obj);
-        if (cache_toquio.length > tamanho_max_cache)
+        for (let n = 0; n < tamanho_bloco_memoria; n++)
         {
-            if (cache_toquio[0].estado !== "INVALIDO")
+            cache_toquio.push({bloco: bloco_ins, offset: n, estado: estado_ins, valor: valores[n]});
+        }
+        if (cache_toquio.length / tamanho_bloco_memoria > tamanho_max_cache)
+        {
+            for (let n = 0; n < tamanho_bloco_memoria; n++)
             {
-                inserir_na_ram(cache_toquio[0].bloco * tamanho_bloco_memoria + cache_toquio[0].offset, cache_toquio[0].valor);
+                if (cache_toquio[0].estado !== "INVALIDO")
+                {
+                    inserir_na_ram(cache_toquio[0].bloco * tamanho_bloco_memoria + cache_toquio[0].offset, cache_toquio[0].valor);
+                }
+                cache_toquio.shift();
             }
-            cache_toquio.shift();
         }
     }
 }
 
-function broadcast_invalidar(endereco)
+function broadcast_invalidar(bloco)
 {
     /*
         Invalida todas as linhas de todas as caches que possuem um determinado endereço
     */
     for (let i = 0; i < cache_nova_iorque.length; i++)
     {
-        if ((cache_nova_iorque[i].bloco * tamanho_bloco_memoria + cache_nova_iorque[i].offset) == endereco)
+        if ((cache_nova_iorque[i].bloco) == bloco)
         {
             cache_nova_iorque[i].estado = "INVALIDO";
         }
     }
     for (let i = 0; i < cache_berlim.length; i++)
     {
-        if ((cache_berlim[i].bloco * tamanho_bloco_memoria + cache_berlim[i].offset) == endereco)
+        if ((cache_berlim[i].bloco) == bloco)
         {
             cache_berlim[i].estado = "INVALIDO";
         }
     }
     for (let i = 0; i < cache_toquio.length; i++)
     {
-        if ((cache_toquio[i].bloco * tamanho_bloco_memoria + cache_toquio[i].offset) == endereco)
+        if ((cache_toquio[i].bloco) == bloco)
         {
             cache_toquio[i].estado = "INVALIDO";
         }
@@ -213,8 +277,11 @@ function dar_lance(local, endereco, valor)
         Parte de escrita do protocolo MESI
         OBS: Um lance só pode ser dado caso ele tenha valor maior que os demais lances existentes e/ou o valor atual do item
     */
+    let bloco = calcula_inicio_bloco(endereco);
+    let offset = endereco % tamanho_bloco_memoria;
 
-    let resultado_busca = buscar_na_cache(local, endereco, false);
+    let resultado_busca = buscar_bloco_na_cache(local, bloco, false);
+    console.log(resultado_busca);
 
     // Se CACHE MISS
     if (resultado_busca == null)
@@ -241,21 +308,22 @@ function dar_lance(local, endereco, valor)
             c_1 = 1;
             c_2 = 2;
         }
-        outra_1 = buscar_na_cache(c_1, endereco, false);
-        outra_2 = buscar_na_cache(c_2, endereco, false);
+        outra_1 = buscar_bloco_na_cache(c_1, bloco, false);
+        outra_2 = buscar_bloco_na_cache(c_2, bloco, false);
         
         // Se não, busque o valor da memória principal (regra de negócio), armazene caso necessário e coloque o estado MODIFICADO
         if (outra_1 === null && outra_2 === null)
         {
             log_trace += "<hr>&#x2022; Nenhuma outra cache tem a cópia dos dados, buscando na memória";
-            let mem = buscar_na_ram(endereco);
-            if (mem >= valor)
+            let valores_ram = buscar_bloco_na_ram(bloco);
+            if (valores_ram[offset] >= valor)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\">Erro: Valor do lance é menor ou igual o valor atual do item, aumente o lance e tente novamente</span>";
                 return;
             }
             log_trace += "<hr>&#x2022; Inserindo o valor na cache atual com o estado Modificado";
-            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+            valores_ram[offset] = valor;
+            inserir_bloco_na_cache(local, bloco, "MODIFICADO", valores_ram);
         }
         // Se sim:
         // Qual é o estado delas?
@@ -271,71 +339,97 @@ function dar_lance(local, endereco, valor)
         {
             log_trace += "<hr>&#x2022; Outra cache tem a cópia do item, analisando o estado...";
             
-            if (outra_1.dados_linha.valor >= valor)
+            if (outra_1[offset].dados_linha.valor >= valor)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                 return;
             }
 
-            if (outra_1.dados_linha.estado === "MODIFICADO")
+            if (outra_1[offset].dados_linha.estado === "MODIFICADO")
             {
-                inserir_na_ram(endereco, outra_1.dados_linha.valor);
+                let temp = [];
+
+                for (let p = 0; p < tamanho_bloco_memoria; p++)
+                {
+                    temp.push(outra_1[p].dados_linha.valor);
+                }
+                inserir_bloco_na_ram(bloco, temp);
             }
 
-            broadcast_invalidar(endereco);
-            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+            broadcast_invalidar(bloco);
+
+            let bloco_memoria = buscar_bloco_na_ram(endereco);
+            bloco_memoria[offset] = valor;
+            inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         }
         if (outra_1 === null && outra_2 !== null)
         {
             log_trace += "<hr>&#x2022; Outra cache tem a cópia do item, analisando o estado...";
-
-            if (outra_2.dados_linha.valor >= valor)
+            
+            if (outra_2[offset].dados_linha.valor >= valor)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                 return;
             }
 
-            if (outra_2.dados_linha.estado === "MODIFICADO")
+            if (outra_2[offset].dados_linha.estado === "MODIFICADO")
             {
-                inserir_na_ram(endereco, outra_2.dados_linha.valor);
+                let temp = [];
+
+                for (let p = 0; p < tamanho_bloco_memoria; p++)
+                {
+                    temp.push(outra_2[p].dados_linha.valor);
+                }
+                inserir_bloco_na_ram(bloco, temp);
             }
-            
-            broadcast_invalidar(endereco);
-            inserir_na_cache(local, endereco, valor, "MODIFICADO");
-            
+
+            broadcast_invalidar(bloco);
+
+            let bloco_memoria = buscar_bloco_na_ram(endereco);
+            bloco_memoria[offset] = valor;
+            inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         } 
         if (outra_1 !== null && outra_2 !== null)
         {
             // Para chegar aqui, o dado deve estar compartilhado
             log_trace += "<hr>&#x2022; As outras duas caches têm cópias do dado, analisando...";
 
-            if (outra_1.dados_linha.valor >= valor || outra_2.dados_linha.valor >= valor)
+            if (outra_1[offset].dados_linha.valor >= valor || outra_2[offset].dados_linha.valor >= valor)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor atual do item em outra cache, aumente o lance e tente novamente</span>";
                 return;
             }
 
-            broadcast_invalidar(endereco);
-            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+            broadcast_invalidar(bloco);
+
+            let bloco_memoria = buscar_bloco_na_ram(endereco);
+            bloco_memoria[offset] = valor;
+            inserir_bloco_na_cache(local, bloco, "MODIFICADO", bloco_memoria);
         }
     }
     // Se CACHE HIT
     else 
     {
         // Ver estado da cópia local
-        let estado_local = resultado_busca.dados_linha.estado;
+        let estado_local = resultado_busca[offset].dados_linha.estado;
         log_trace += "<hr>&#x2022; Cache Hit: Analisando estado atual da linha na cache local";
         // Se MODIFICADO, apenas alterar o valor
         // Se EXCLUSIVO, alterar o valor e mudar o estado para MODIFIED
         if (estado_local === "MODIFICADO" || estado_local === "EXCLUSIVO")
         {
-            if (valor <= resultado_busca.dados_linha.valor)
+            if (valor <= resultado_busca[offset].dados_linha.valor)
             {
                 log_trace += "<hr>&#x2022; <span style=\"color: red\"> Erro: Valor do lance é menor ou igual o valor de um lance existente, aumente o lance e tente novamente</span>";
                 return;
             }
             log_trace += "<hr>&#x2022; Estado era modificado ou exclusivo, alterou-se o valor e o estado foi para Modificado";
-            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+            resultado_busca[offset].dados_linha.valor = valor;
+            let temp = [];
+            for (let p = 0; p < tamanho_bloco_memoria; p++)
+            {
+                temp.push(resultado_busca[p].dados_linha.valor);
+            }
+            inserir_bloco_na_cache(local, bloco, "MODIFICADO", temp);
         }
 
         // Se COMPARTILHADO:
@@ -350,21 +444,29 @@ function dar_lance(local, endereco, valor)
                 return;
             }
             log_trace += "<hr>&#x2022; Estado era compartilhado, alterou-se o valor, invalidou-se as cópias dos outros locais e mudou-se o estado para Modificado";
-            broadcast_invalidar(endereco);
-            inserir_na_cache(local, endereco, valor, "MODIFICADO");
+            broadcast_invalidar(bloco);
+            resultado_busca[offset].dados_linha.valor = valor;
+            let temp = [];
+            for (let p = 0; p < tamanho_bloco_memoria; p++)
+            {
+                temp.push(resultado_busca[p].dados_linha.valor);
+            }
+            inserir_bloco_na_cache(local, bloco, "MODIFICADO", temp);
         }
     }
 }
 
 function buscar_preco(local, endereco)
 {
-    let resultado_busca = buscar_na_cache(local, endereco, false);
+    let bloco = calcula_inicio_bloco(endereco);
+    let offset = endereco % tamanho_bloco_memoria;
+    let resultado_busca = buscar_bloco_na_cache(local, bloco, false);
     
     // Se CACHE HIT, apenas retornar o valor
     if (resultado_busca !== null)
     {
         log_trace += "<hr>&#x2022; Cache hit! Retornando o valor";
-        log_trace += "<hr>Valor encontrado: R$" + resultado_busca.dados_linha.valor;
+        log_trace += "<hr>Valor encontrado: R$" + resultado_busca[offset].dados_linha.valor;
         // return resultado_busca.dados_linha.valor;
     }
     else
@@ -390,8 +492,8 @@ function buscar_preco(local, endereco)
             c_1 = 1;
             c_2 = 2;
         }
-        outra_1 = buscar_na_cache(c_1, endereco, false);
-        outra_2 = buscar_na_cache(c_2, endereco, false);
+        outra_1 = buscar_bloco_na_cache(c_1, bloco, false);
+        outra_2 = buscar_bloco_na_cache(c_2, bloco, false);
         
         if (outra_1 === null && outra_2 === null)
         {
@@ -399,9 +501,9 @@ function buscar_preco(local, endereco)
             // Se nenhum tem cópia:
             //    Pegar dado da memória
             //    Guardar na cache adequada (do local) com o estado EXCLUSIVO
-            let dado = buscar_na_ram(endereco);
-            log_trace += "<hr>Valor encontrado: R$" + dado;
-            inserir_na_cache(local, endereco, dado, "EXCLUSIVO");
+            let dados_bloco = buscar_bloco_na_ram(endereco);
+            inserir_bloco_na_cache(local, bloco, "EXCLUSIVO", dados_bloco);
+            log_trace += "<hr>Valor encontrado: R$" + dados_bloco[offset];
         }
         else
         {
@@ -416,26 +518,42 @@ function buscar_preco(local, endereco)
             if (outra_1 !== null && outra_2 === null)
             {
                 log_trace += "<hr>&#x2022; Uma cache tem o valor, compartilhando...";
-                if (outra_1.dados_linha.estado === "MODIFICADO")
+
+                let temp = [];
+                for (let p = 0; p < tamanho_bloco_memoria; p++)
+                {
+                    temp.push(outra_1[p].dados_linha.valor);
+                }
+
+                if (outra_1[offset].dados_linha.estado === "MODIFICADO")
                 {
                     log_trace += "<hr>&#x2022; Dado estava modificado, armazenando ele...";
-                    inserir_na_ram(endereco, outra_1.dados_linha.valor);
+                    
+                    inserir_bloco_na_ram(endereco, temp);
                 }
-                inserir_na_cache(c_1, endereco, outra_1.dados_linha.valor, "COMPARTILHADO");
-                inserir_na_cache(local, endereco, outra_1.dados_linha.valor, "COMPARTILHADO");
-                log_trace += "<hr>Valor encontrado: R$" + outra_1.dados_linha.valor;
+                inserir_bloco_na_cache(c_1, bloco, "COMPARTILHADO", temp);
+                inserir_bloco_na_cache(local, bloco, "COMPARTILHADO", temp);
+                log_trace += "<hr>Valor encontrado: R$" + outra_1[offset].dados_linha.valor;
             }
             if (outra_1 === null && outra_2 !== null)
             {
                 log_trace += "<hr>&#x2022; Uma cache tem o valor, compartilhando...";
-                if (outra_2.dados_linha.estado === "MODIFICADO")
+
+                let temp = [];
+                for (let p = 0; p < tamanho_bloco_memoria; p++)
+                {
+                    temp.push(outra_2[p].dados_linha.valor);
+                }
+
+                if (outra_2[offset].dados_linha.estado === "MODIFICADO")
                 {
                     log_trace += "<hr>&#x2022; Dado estava modificado, armazenando ele...";
-                    inserir_na_ram(endereco, outra_2.dados_linha.valor);
+                    
+                    inserir_bloco_na_ram(endereco, temp);
                 }
-                inserir_na_cache(c_2, endereco, outra_2.dados_linha.valor, "COMPARTILHADO");
-                inserir_na_cache(local, endereco, outra_2.dados_linha.valor, "COMPARTILHADO");
-                log_trace += "<hr>Valor encontrado: R$" + outra_2.dados_linha.valor;
+                inserir_bloco_na_cache(c_2, bloco, "COMPARTILHADO", temp);
+                inserir_bloco_na_cache(local, bloco, "COMPARTILHADO", temp);
+                log_trace += "<hr>Valor encontrado: R$" + outra_2[offset].dados_linha.valor;
             }
             if (outra_1 !== null && outra_2 !== null)
             {
@@ -444,8 +562,14 @@ function buscar_preco(local, endereco)
                 // Se mais de um tem a cópia:   
                 //    Recebe o valor de qualquer cache
                 //    Altere o estado da cache local para SHARED
-                inserir_na_cache(local, endereco, outra_1.dados_linha.valor, "COMPARTILHADO");
-                log_trace += "<hr>Valor encontrado: R$" + outra_1.dados_linha.valor;
+                let temp = [];
+                for (let p = 0; p < tamanho_bloco_memoria; p++)
+                {
+                    temp.push(outra_2[p].dados_linha.valor);
+                }
+
+                inserir_bloco_na_cache(local, bloco, "COMPARTILHADO", temp);
+                log_trace += "<hr>Valor encontrado: R$" + outra_2[offset].dados_linha.valor;
             }
         }
     }
@@ -526,7 +650,7 @@ function realizar_operacao()
     // Realizar MESI
     entrada_mesi(operacao, valor, id, local);
     
-    log_trace += "<hr><br>&#x2022; Nº linhas ocupadas das caches: " + cache_nova_iorque.length + " | " + cache_berlim.length + " | " + cache_toquio.length;
+    log_trace += "<hr><br>&#x2022; Nº linhas ocupadas das caches: " + cache_nova_iorque.length / tamanho_bloco_memoria + " | " + cache_berlim.length / tamanho_bloco_memoria + " | " + cache_toquio.length / tamanho_bloco_memoria;
     
     gui_atualizar_cache(1);
     gui_atualizar_cache(2);
@@ -539,6 +663,8 @@ function realizar_operacao()
 
     document.getElementById("log-trace").innerHTML = log_trace;
 }
+
+let cores_blocos = [];
 
 function gui_atualizar_cache(cache)
 {
@@ -568,18 +694,18 @@ function gui_atualizar_cache(cache)
 
     elemento_pai.innerHTML = "";
 
-    
     for (let i = 0; i < cache_usada.length; i++)
     {
         let novo_filho = document.createElement("tr");
         let texto = "";
 
-        texto += "<td>"+ cache_usada[i].bloco +"</td>";  // aqui vem o Bloco
-        texto += "<td>"+ cache_usada[i].offset +"</td>";  // aqui vem o Offset
-        texto += "<td>"+ cache_usada[i].estado +"</td>";  // aqui vem o Estado
-        texto += "<td>"+ cache_usada[i].valor +"</td>";  // aqui vem o valor
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].bloco +"</td>";  // aqui vem o Bloco
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].offset +"</td>";  // aqui vem o Offset
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].estado +"</td>";  // aqui vem o Estado
+        texto += "<td "+cores_blocos[cache_usada[i].bloco]+">"+ cache_usada[i].valor +"</td>";  // aqui vem o valor
         novo_filho.innerHTML = texto; 
         elemento_pai.appendChild(novo_filho);      
+
     }
 }
 
@@ -623,6 +749,14 @@ function inicializar_pagina()
     */
     preencher_ram();
     gui_atualizar_ram();
+
+    for (let i = 0; i < tamanho_max_ram / tamanho_bloco_memoria; i++)
+    {
+        let r = Math.floor(Math.random() * 255);
+        let g = Math.floor(Math.random() * 255);
+        let b = Math.floor(Math.random() * 255);
+        cores_blocos.push("style=\"background: rgba(" + r + "," + g + "," + b + ",.1);\"");
+    }
 }
 
 function geradorItemAleatorio()
