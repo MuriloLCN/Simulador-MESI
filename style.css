@@ -30,7 +30,7 @@ body { margin: 0; padding: 0; }
 
 .log-execucao {
     width: 100%;
-    height: 80vh;
+    height: 76.5vh;
     padding: 10px;
     /* background-color: green; */
     display: flex;
@@ -72,7 +72,7 @@ body { margin: 0; padding: 0; }
     padding: 10px;
     /* background-color: brown; */
     width: 100%;
-    height: 55vh;
+    height: 50vh;
 }
 
 /* <div> <!-- Caixa externa -->
