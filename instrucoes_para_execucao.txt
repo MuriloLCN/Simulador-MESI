@@ -1,0 +1,24 @@
+Trabalho Prático 1 – Simulador Protocolo MESI em uma aplicação
+    Disciplina: Arquitetura e Organização de Computadores II Código: 6895
+    Curso: Ciência da Computação Turma: 01
+    Professora: Sandra Cossul
+    Semestre: 2024/1
+
+    Alunos:
+        Murilo Luis Calvo Neves | RA 129037
+        Leandro Silva Novakosky | RA 129849
+
+===== INSTRUÇÕES PARA EXECUÇÃO =====
+
+Por se tratar de um código em JS+HTML+CSS, é apenas necessário um
+navegador para se executar a simulação, basta abrir o arquivo
+"index.html" nele que a simulação executará imediatamente.
+
+Navegadores testados:
+
+Funcionam:
+- Brave
+- Edge
+
+Não funcionam:
+- Mullvad (não permite JS)
