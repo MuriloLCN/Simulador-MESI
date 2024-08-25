@@ -592,11 +592,8 @@ function entrada_mesi(operacao, valor, endereco, local)
     */
 
     // Se endereço deu OVERFLOW, calcular rotação
-    if (endereco > tamanho_max_ram)
-    {
-        endereco = endereco % tamanho_max_ram;
-    }
-
+    endereco = endereco % tamanho_max_ram;
+    
     if (operacao == 1)
     {
         log_trace += "<hr>&#x2022; Iniciando operação: Dar lance (escrita) no item de endereço " + endereco + " com o valor de " + valor + " reais por meio do local " + local;
