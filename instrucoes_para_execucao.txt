@@ -14,6 +14,8 @@ Por se tratar de um código em JS+HTML+CSS, é apenas necessário um
 navegador para se executar a simulação, basta abrir o arquivo
 "index.html" nele que a simulação executará imediatamente.
 
+Preferencialmente, a simulação pode ser acessada por meio do link: https://murilolcn.github.io/Simulador-MESI/
+
 Navegadores testados:
 
 Funcionam:
@@ -25,4 +27,3 @@ Funcionam:
 Não funcionam:
 - Mullvad (não permite JS)
 
-Alternativamente, a simulação pode ser acessada por meio do link: https://murilolcn.github.io/Simulador-MESI/
