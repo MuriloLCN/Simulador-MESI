@@ -288,6 +288,19 @@ function dar_lance(local, endereco, valor_ins)
         Parte de escrita do protocolo MESI
         OBS: Um lance só pode ser dado caso ele tenha valor maior que os demais lances existentes e/ou o valor atual do item
     */
+
+    if (valor_ins < 0)
+    {
+        alert("Valor deve ser positivo");
+        return;
+    }
+
+    if (endereco < 0)
+    {
+        alert("Id deve ser positivo");
+        return;
+    }
+
     let bloco = calcula_inicio_bloco(endereco);
     let offset = endereco % tamanho_bloco_memoria;
 
@@ -468,9 +481,17 @@ function dar_lance(local, endereco, valor_ins)
 
 function buscar_preco(local, endereco)
 {
+    if (endereco < 0)
+    {
+        alert("Id deve ser positivo");
+        return;
+    }
+    
     let bloco = calcula_inicio_bloco(endereco);
     let offset = endereco % tamanho_bloco_memoria;
     let resultado_busca = buscar_bloco_na_cache(local, bloco, false);
+
+    
     
     // Se CACHE HIT, apenas retornar o valor
     if (resultado_busca !== null)
@@ -656,12 +677,6 @@ function realizar_operacao()
         if (Number.isNaN(valor))
         {
             alert("Valor deve ser um número");
-            return;
-        }
-
-        if (valor < 0)
-        {
-            alert("Valor deve ser positivo");
             return;
         }
     }
