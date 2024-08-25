@@ -24,3 +24,5 @@ Funcionam:
 
 Não funcionam:
 - Mullvad (não permite JS)
+
+Alternativamente, a simulação pode ser acessada por meio do link: https://murilolcn.github.io/Simulador-MESI/
