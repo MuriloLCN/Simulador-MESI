@@ -19,6 +19,8 @@ Navegadores testados:
 Funcionam:
 - Brave
 - Edge
+- Opera GX
+- Google Chrome
 
 Não funcionam:
 - Mullvad (não permite JS)
