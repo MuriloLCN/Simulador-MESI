@@ -642,6 +642,12 @@ function realizar_operacao()
         return;
     }
 
+    if (id < 0)
+    {
+        alert("Id deve ser positivo");
+        return;
+    }   
+
     // Verificar se o valor é um número válido
     if (operacao == 1)
     {
@@ -650,6 +656,12 @@ function realizar_operacao()
         if (Number.isNaN(valor))
         {
             alert("Valor deve ser um número");
+            return;
+        }
+
+        if (valor < 0)
+        {
+            alert("Valor deve ser positivo");
             return;
         }
     }
